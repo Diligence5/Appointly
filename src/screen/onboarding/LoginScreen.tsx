@@ -62,7 +62,7 @@ export const LoginScreen = ({ navigation }: any) => {
 
         if (isEmailValid && isPasswordValid) {
             setIsLoading(true);
-            
+
             // In a real app, you would make an API call here
             // For this demo, we'll simulate a successful login
             setTimeout(() => {
@@ -73,18 +73,17 @@ export const LoginScreen = ({ navigation }: any) => {
                     email: email,
                     phone_number: '',
                 };
-                
+
                 // Generate a mock token
                 const mockToken = 'mock-jwt-token-' + Math.random().toString(36).substring(2);
-                
-                // Dispatch actions to update Redux state
-                dispatch(setUser(mockUser));
-                dispatch(setAccessToken(mockToken));
-                
+
                 setIsLoading(false);
-                
-                // Navigate to the main app
-                navigation.replace('MainApp');
+
+                // Navigate to the premium plan screen instead of setting auth directly
+                navigation.navigate('PremiumPlan', {
+                    userData: mockUser,
+                    token: mockToken
+                });
             }, 1500); // Simulate network delay
         }
     };
@@ -181,8 +180,8 @@ export const LoginScreen = ({ navigation }: any) => {
                         </TouchableOpacity>
 
                         {/* Login Button */}
-                        <TouchableOpacity 
-                            onPress={handleLogin} 
+                        <TouchableOpacity
+                            onPress={handleLogin}
                             style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
                             disabled={isLoading}
                         >

@@ -1,4 +1,4 @@
-import {ImageSourcePropType} from 'react-native';
+import { ImageSourcePropType } from 'react-native';
 
 interface Images {
   icon_logo: ImageSourcePropType;
@@ -32,6 +32,12 @@ interface Images {
   icon_message_unselected: ImageSourcePropType;
   icon_profile_unselected: ImageSourcePropType;
   icon_profile_selected: ImageSourcePropType;
+  icon_notification_black: ImageSourcePropType;
+  icon_check_green: ImageSourcePropType;
+  icon_setting_black: ImageSourcePropType;
+  icon_info_circle_black: ImageSourcePropType;
+  icon_profile_place_holder: ImageSourcePropType;
+  icon_logout_red: ImageSourcePropType;
 }
 
 const images: Images = {
@@ -66,5 +72,11 @@ const images: Images = {
   icon_message_unselected: require('./icon_message_unselected.png'),
   icon_profile_unselected: require('./icon_profile_unselected.png'),
   icon_profile_selected: require('./icon_profile_selected.png'),
+  icon_notification_black: require('./icon_notification_black.png'),
+  icon_check_green: require('./icon_check_green.png'),
+  icon_setting_black: require('./icon_setting_black.png'),
+  icon_info_circle_black: require('./icon_info_circle_black.png'),
+  icon_profile_place_holder: require('./icon_profile_place_holder.png'),
+  icon_logout_red: require('./icon_logout_red.png'),
 };
 export default images;

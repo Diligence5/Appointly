@@ -34,7 +34,7 @@ export const SignupScreen = ({ navigation }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
-  
+
   const validateName = (name: string) => {
     if (!name) {
       setNameError('Name is required');
@@ -43,7 +43,7 @@ export const SignupScreen = ({ navigation }: any) => {
     setNameError('');
     return true;
   };
-  
+
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
@@ -56,7 +56,7 @@ export const SignupScreen = ({ navigation }: any) => {
     setEmailError('');
     return true;
   };
-  
+
   const validatePhone = (phone: string) => {
     if (!phone) {
       setPhoneError('Phone number is required');
@@ -65,7 +65,7 @@ export const SignupScreen = ({ navigation }: any) => {
     setPhoneError('');
     return true;
   };
-  
+
   const validatePassword = (password: string) => {
     if (!password) {
       setPasswordError('Password is required');
@@ -77,16 +77,16 @@ export const SignupScreen = ({ navigation }: any) => {
     setPasswordError('');
     return true;
   };
-  
+
   const handleSignup = () => {
     const isNameValid = validateName(name);
     const isEmailValid = validateEmail(email);
     const isPhoneValid = validatePhone(phone);
     const isPasswordValid = validatePassword(password);
-    
+
     if (isNameValid && isEmailValid && isPhoneValid && isPasswordValid) {
       setIsLoading(true);
-      
+
       // In a real app, you would make an API call here
       // For this demo, we'll simulate a successful registration
       setTimeout(() => {
@@ -97,33 +97,32 @@ export const SignupScreen = ({ navigation }: any) => {
           email: email,
           phone_number: phone,
         };
-        
+
         // Generate a mock token
         const mockToken = 'mock-jwt-token-' + Math.random().toString(36).substring(2);
-        
-        // Dispatch actions to update Redux state
-        dispatch(setUser(newUser));
-        dispatch(setAccessToken(mockToken));
-        
+
         setIsLoading(false);
-        
-        // Navigate to the main app
-        navigation.replace('MainApp');
+
+        // Navigate to the premium plan screen instead of setting auth directly
+        navigation.navigate('PremiumPlan', {
+          userData: newUser,
+          token: mockToken
+        });
       }, 1500); // Simulate network delay
     }
   };
-  
+
   const handleLogin = () => {
     navigation.navigate('Login');
   };
-  
+
   const goBack = () => {
     navigation.goBack();
   };
-  
+
   return (
     <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
@@ -136,12 +135,12 @@ export const SignupScreen = ({ navigation }: any) => {
               resizeMode="contain"
             />
           </TouchableOpacity>
-          
+
           <View style={styles.headerContainer}>
             <Text style={styles.title}>Create New Account</Text>
             <Text style={styles.subtitle}>Please create account first before enjoy the features.</Text>
           </View>
-          
+
           <View style={styles.form}>
             {/* Name Input */}
             <Text style={styles.label}>Full Name</Text>
@@ -160,7 +159,7 @@ export const SignupScreen = ({ navigation }: any) => {
               />
             </View>
             {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
-            
+
             {/* Email Input */}
             <Text style={[styles.label, { marginTop: 20 }]}>Email Address</Text>
             <View style={styles.inputWrapper}>
@@ -180,7 +179,7 @@ export const SignupScreen = ({ navigation }: any) => {
               />
             </View>
             {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
-            
+
             {/* Phone Input */}
             <Text style={[styles.label, { marginTop: 20 }]}>Phone Number</Text>
             <View style={styles.inputWrapper}>
@@ -199,7 +198,7 @@ export const SignupScreen = ({ navigation }: any) => {
               />
             </View>
             {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
-            
+
             {/* Password Input */}
             <Text style={[styles.label, { marginTop: 20 }]}>Password</Text>
             <View style={styles.inputWrapper}>
@@ -228,10 +227,10 @@ export const SignupScreen = ({ navigation }: any) => {
               </TouchableOpacity>
             </View>
             {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
-            
+
             {/* Signup Button */}
-            <TouchableOpacity 
-              onPress={handleSignup} 
+            <TouchableOpacity
+              onPress={handleSignup}
               style={[styles.signupButton, isLoading && styles.signupButtonDisabled]}
               disabled={isLoading}
             >
@@ -239,11 +238,11 @@ export const SignupScreen = ({ navigation }: any) => {
                 {isLoading ? 'Creating Account...' : 'Create Account'}
               </Text>
             </TouchableOpacity>
-            
+
             {/* Social Signup Section */}
             <View style={styles.socialLoginContainer}>
               <Text style={styles.orText}>Or login using</Text>
-              
+
               <TouchableOpacity style={styles.socialButton}>
                 <Image
                   source={images.icon_google_logo}
@@ -252,7 +251,7 @@ export const SignupScreen = ({ navigation }: any) => {
                 />
                 <Text style={styles.socialButtonText}>Sign Up using Google</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity style={styles.socialButton}>
                 <Image
                   source={images.icon_facebook_logo}
@@ -262,7 +261,7 @@ export const SignupScreen = ({ navigation }: any) => {
                 <Text style={styles.socialButtonText}>Sign Up using Facebook</Text>
               </TouchableOpacity>
             </View>
-            
+
             {/* Login instead */}
             <View style={styles.loginInsteadContainer}>
               <Text style={styles.loginInsteadText}>Already have an account?</Text>
@@ -296,7 +295,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   backIcon: {
-  
+
   },
   headerContainer: {
     marginTop: 16,

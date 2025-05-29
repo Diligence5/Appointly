@@ -7,6 +7,18 @@ import { OnboardingScreen } from "../screen/onboarding/OnboardingScreen";
 import { LoginScreen } from "../screen/onboarding/LoginScreen";
 import { SignupScreen } from "../screen/onboarding/SignupScreen";
 import { ForgotPasswordScreen } from "../screen/onboarding/ForgotPasswordScreen";
+import { PremiumPlanScreen } from "../screen/onboarding/PremiumPlanScreen";
+import { StoreDetailsScreen } from "../screen/onboarding/StoreDetailsScreen";
+import { StoreProfileScreen } from "../screen/onboarding/StoreProfileScreen";
+import { StaffScreen } from "../screen/onboarding/StaffScreen";
+import { ServicesScreen } from "../screen/onboarding/ServicesScreen";
+import { ServicePricingScreen } from "../screen/onboarding/ServicePricingScreen";
+import { ServicesOfferedScreen } from "../screen/onboarding/ServicesOfferedScreen";
+import { BankDetailsScreen } from "../screen/onboarding/BankDetailsScreen";
+import { StoreHoursScreen } from "../screen/onboarding/StoreHoursScreen";
+import { StoreCategoryScreen } from "../screen/onboarding/StoreCategoryScreen";
+import { BookingFeeScreen } from "../screen/onboarding/BookingFeeScreen";
+import { StaffAvailabilityScreen } from "../screen/onboarding/StaffAvailabilityScreen";
 import BottomTab from "./BottomTab";
 import { MessagesScreen } from "../screen/messages/MessagesScreen";
 import { MessageDetailScreen } from "../screen/messages/MessageDetailScreen";
@@ -21,6 +33,18 @@ export type RootStackParamList = {
     Login: undefined;
     Signup: undefined;
     ForgotPassword: undefined;
+    PremiumPlan: { userData: any; token: string };
+    StoreDetails: { userData: any; token: string };
+    StoreProfile: { userData: any; token: string };
+    Staff: { userData: any; token: string };
+    Services: { userData: any; token: string };
+    ServicePricing: { userData: any; token: string; selectedServices: any[] };
+    ServicesOffered: { userData: any; token: string; services: any[] };
+    BankDetails: { userData: any; token: string };
+    StoreHours: { userData: any; token: string };
+    StoreCategory: { userData: any; token: string };
+    BookingFee: { userData: any; token: string };
+    StaffAvailability: { userData: any; token: string };
     MainApp: undefined;
     Messages: undefined;
     MessageDetail: { messageId: string };
@@ -68,6 +92,18 @@ function Routes(): React.JSX.Element {
                         <Stack.Screen name="Login" component={LoginScreen} />
                         <Stack.Screen name="Signup" component={SignupScreen} />
                         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+                        <Stack.Screen name="PremiumPlan" component={PremiumPlanScreen} />
+                        <Stack.Screen name="StoreDetails" component={StoreDetailsScreen} />
+                        <Stack.Screen name="StoreProfile" component={StoreProfileScreen} />
+                        <Stack.Screen name="Staff" component={StaffScreen} />
+                        <Stack.Screen name="Services" component={ServicesScreen} />
+                        <Stack.Screen name="ServicePricing" component={ServicePricingScreen} />
+                        <Stack.Screen name="ServicesOffered" component={ServicesOfferedScreen} />
+                        <Stack.Screen name="BankDetails" component={BankDetailsScreen} />
+                        <Stack.Screen name="StoreHours" component={StoreHoursScreen} />
+                        <Stack.Screen name="StoreCategory" component={StoreCategoryScreen} />
+                        <Stack.Screen name="BookingFee" component={BookingFeeScreen} />
+                        <Stack.Screen name="StaffAvailability" component={StaffAvailabilityScreen} />
                     </>
                 ) : (
                     // App Flow

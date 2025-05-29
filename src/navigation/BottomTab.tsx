@@ -39,26 +39,29 @@ function BottomTab(props: any): React.JSX.Element {
                 initialRouteName="Booking"
                 screenOptions={({ route }) => ({
                     tabBarLabelStyle: {
-                        fontSize: 9,
+                        fontSize: 10,
                         fontFamily: FontFamily.medium,
+                        marginBottom: 8,
                     },
                     tabBarActiveTintColor: Color.primary,
                     tabBarInactiveTintColor: Color.black,
                     tabBarStyle: {
                         backgroundColor: Color.white,
-                        height: 70,
+                        height: 60,
+                        borderTopWidth: 1,
+                        borderTopColor: '#E5E5E5',
                     },
                     tabBarIcon: ({ focused, color, size }) => {
                         let iconSource;
                         switch (route.name) {
                             case "Booking":
-                                iconSource = images.icon_home;
+                                iconSource = focused ? images.icon_booking_selected : images.icon_booking_unselected;
                                 break;
                             case "Messages":
-                                iconSource = images.icon_my_needs;
+                                iconSource = focused ? images.icon_message_selected : images.icon_message_unselected;
                                 break;
                             case "Profile":
-                                iconSource = images.icon_profile;
+                                iconSource = focused ? images.icon_profile_selected : images.icon_profile_unselected;
                                 break;
                             default:
                                 iconSource = null;
@@ -68,16 +71,15 @@ function BottomTab(props: any): React.JSX.Element {
                             <Image
                                 source={iconSource}
                                 style={{
-                                    width: size,
-                                    height: size,
-                                    tintColor: color,
+                                    width: 24,
+                                    height: 24,
                                 }}
                                 resizeMode="contain"
                             />
                         ) : null;
                     },
                     title: setTabBarTitle(route.name),
-                    tabBarIconStyle: { height: 20, width: 20, marginTop: 14, marginBottom: 6 }
+                    tabBarIconStyle: { marginTop: 10 }
                 })}
             >
                 <Tab.Screen name="Booking" component={BookingScreen} options={{ headerShown: false }} />

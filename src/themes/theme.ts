@@ -37,7 +37,7 @@ export const Color: Color = {
   secondary: '#3C5041',
   placeholder: '#858585',
   white: '#FFFFFF',
-  border: '#F3F3F3',
+  border: '#E0E0E0',
   red: '#F1441C',
   yellow: '#FFBD2E',
   black_text: '#1C1C28',
