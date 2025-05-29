@@ -32,7 +32,7 @@ interface MembershipPlan {
 }
 
 export const PremiumPlanScreen = ({ navigation, route }: any) => {
-    const { userData, token } = route.params;
+    const { userData, token } = route.params || {};
     const dispatch = useDispatch();
     const insets = useSafeAreaInsets();
     const [selectedPlanId, setSelectedPlanId] = useState('2'); // Default to middle (premium) plan
@@ -77,7 +77,13 @@ export const PremiumPlanScreen = ({ navigation, route }: any) => {
     ];
 
     const handleSkip = () => {
-        // Set user as authenticated and navigate to main app
+        // If we're in the authenticated flow, just go back
+        if (!token) {
+            navigation.goBack();
+            return;
+        }
+        
+        // Otherwise, set user as authenticated and navigate to main app
         if (userData && token) {
             dispatch(setUser(userData as User));
             dispatch(setAccessToken(token));
@@ -86,7 +92,13 @@ export const PremiumPlanScreen = ({ navigation, route }: any) => {
     };
 
     const handleStartFreeTrial = () => {
-        // Instead of directly navigating to MainApp, navigate to StoreDetailsScreen
+        // If we're in the authenticated flow, just go back
+        if (!token) {
+            navigation.goBack();
+            return;
+        }
+        
+        // Otherwise, navigate to StoreDetailsScreen
         navigation.navigate('StoreDetails', { userData, token });
     };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,14 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from 'react-native';
 import { Color } from '../../themes/theme';
 import { FontFamily } from '../../constants/FontFamily';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import images from '../../../assets/images/images';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ChatMessage {
   id: string;
@@ -29,6 +31,8 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const user = useSelector((state: RootState) => state.auth.user);
+  const insets = useSafeAreaInsets();
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // Mock data for the selected message thread
   const mockContacts: Record<string, { name: string, avatar?: string, profession: string }> = {
@@ -67,18 +71,43 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
       },
       {
         id: '3',
-        text: messageId === '1' 
-          ? 'Great! I wanted to confirm your appointment for tomorrow at 2:00 PM. Does that still work for you?' 
+        text: messageId === '1'
+          ? 'Great! I wanted to confirm your appointment for tomorrow at 2:00 PM. Does that still work for you?'
           : messageId === '2'
-          ? 'Welcome to Appointly! If you need any help getting started, please don\'t hesitate to reach out.'
-          : 'Your test results have been uploaded to your patient portal. Everything looks good!',
+            ? 'Welcome to Appointly! If you need any help getting started, please don\'t hesitate to reach out.'
+            : 'Your test results have been uploaded to your patient portal. Everything looks good!',
         isUser: false,
         timestamp: '10:33 AM'
       },
     ];
-    
+
     setMessages(mockConversation);
   }, [messageId, user]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+  }, [messages]);
+
+  // Add keyboard listeners to scroll to bottom when keyboard appears
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      scrollToBottom
+    );
+    
+    return () => {
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
+  const scrollToBottom = () => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  };
 
   const handleSend = () => {
     if (newMessage.trim()) {
@@ -88,10 +117,10 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
         isUser: true,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      
+
       setMessages(prev => [...prev, newMsg]);
       setNewMessage('');
-      
+
       // Simulate response after a short delay
       setTimeout(() => {
         const responseMsg: ChatMessage = {
@@ -110,7 +139,7 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={goBack}>
           <Image
@@ -119,12 +148,12 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
             resizeMode="contain"
           />
         </TouchableOpacity>
-        
+
         <View style={styles.contactInfo}>
           <Text style={styles.contactName}>{contact?.name || 'Contact'}</Text>
           <Text style={styles.contactProfession}>{contact?.profession || ''}</Text>
         </View>
-        
+
         {contact?.avatar ? (
           <Image source={{ uri: contact.avatar }} style={styles.contactAvatar} />
         ) : (
@@ -136,17 +165,19 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
         )}
       </View>
 
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
-        <ScrollView 
+        <ScrollView
+          ref={scrollViewRef}
           style={styles.messagesContainer}
           contentContainerStyle={styles.messagesContent}
+          keyboardShouldPersistTaps="handled"
         >
           {messages.map(message => (
-            <View 
+            <View
               key={message.id}
               style={[
                 styles.messageBubble,
@@ -170,19 +201,27 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
         </ScrollView>
 
         <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Type a message..."
-            value={newMessage}
-            onChangeText={setNewMessage}
-            multiline
-          />
-          <TouchableOpacity 
-            style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]} 
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              placeholder="Type a message..."
+              value={newMessage}
+              onChangeText={setNewMessage}
+              multiline
+              maxLength={500}
+              onSubmitEditing={Keyboard.dismiss}
+            />
+          </View>
+          <TouchableOpacity
+            style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
             onPress={handleSend}
             disabled={!newMessage.trim()}
           >
-            <Text style={styles.sendButtonText}>Send</Text>
+            <Image 
+              source={images.icon_send_message}
+              style={styles.sendIcon}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -203,11 +242,10 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E0E0E0',
   },
   backButton: {
-    padding: 8,
+
   },
   backIcon: {
-    width: 20,
-    height: 20,
+
   },
   contactInfo: {
     flex: 1,
@@ -243,17 +281,19 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingView: {
     flex: 1,
+    justifyContent: 'space-between',
   },
   messagesContainer: {
     flex: 1,
   },
   messagesContent: {
     padding: 16,
+    paddingBottom: 8,
   },
   messageBubble: {
     maxWidth: '80%',
     padding: 12,
-    borderRadius: 16,
+    borderRadius: 20,
     marginBottom: 8,
   },
   userMessage: {
@@ -267,12 +307,13 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
   },
   messageText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: FontFamily.regular,
     color: Color.black,
+    lineHeight: 22,
   },
   messageTimestamp: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: FontFamily.regular,
     color: Color.placeholder,
     marginTop: 4,
@@ -280,35 +321,42 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
+    alignItems: 'center',
+    backgroundColor: Color.white,
   },
-  input: {
+  inputWrapper: {
     flex: 1,
     backgroundColor: '#F5F5F5',
     borderRadius: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 4,
+  },
+  input: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     fontSize: 16,
     fontFamily: FontFamily.regular,
-    maxHeight: 120,
+    maxHeight: 100,
+    minHeight: 40,
   },
   sendButton: {
-    marginLeft: 12,
+    marginLeft: 8,
     backgroundColor: Color.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
   },
   sendButtonDisabled: {
     backgroundColor: Color.primary + '80',
   },
-  sendButtonText: {
-    color: Color.white,
-    fontSize: 16,
-    fontFamily: FontFamily.bold,
+  sendIcon: {
+    width: 20,
+    height: 20,
+    tintColor: Color.white,
   },
 }); 

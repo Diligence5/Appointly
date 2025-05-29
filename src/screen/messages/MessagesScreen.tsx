@@ -1,109 +1,108 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  FlatList,
+  TouchableOpacity,
+  Image
+} from 'react-native';
 import { Color } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import { strings } from '../../constants/strings';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../redux/store';
+import { FontFamily } from '../../constants/FontFamily';  
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import images from '../../../assets/images/images';
 
 interface Message {
   id: string;
-  sender: string;
-  message: string;
+  name: string;
+  preview: string;
   timestamp: string;
-  isRead: boolean;
-  avatar?: string;
+  avatar: any;
+  hasEmoji?: boolean;
 }
 
 export const MessagesScreen = ({ navigation }: any) => {
-  const [messages, setMessages] = React.useState<Message[]>([]);
-  const user = useSelector((state: RootState) => state.auth.user);
-  
-  useEffect(() => {
-    // Generate mock messages
-    const mockMessages: Message[] = [
-      {
-        id: '1',
-        sender: 'Dr. Sarah Johnson',
-        message: `Hi ${user?.name || 'there'}, I wanted to confirm your appointment for tomorrow at 2:00 PM. Please let me know if that still works for you.`,
-        timestamp: '10:30 AM',
-        isRead: false,
-        avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-      },
-      {
-        id: '2',
-        sender: 'Appointly Support',
-        message: 'Welcome to Appointly! If you need any help getting started, please don\'t hesitate to reach out.',
-        timestamp: 'Yesterday',
-        isRead: true,
-      },
-      {
-        id: '3',
-        sender: 'Dr. Michael Chen',
-        message: 'Your test results have been uploaded to your patient portal. Everything looks good!',
-        timestamp: '2 days ago',
-        isRead: true,
-        avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      },
-    ];
-    
-    setMessages(mockMessages);
-  }, [user]);
-  
+  const insets = useSafeAreaInsets();
+
+  // Mock message data based on the image
+  const messages: Message[] = [
+    {
+      id: '1',
+      name: 'Haisley Junior',
+      preview: 'How are you?',
+      timestamp: '2 mins ago',
+      avatar: require('../../../assets/images/icon_profile_place_holder.png')
+    },
+    {
+      id: '2',
+      name: 'Javier Stongry',
+      preview: 'Omg, this is amazing',
+      timestamp: '8/2/2023',
+      avatar: require('../../../assets/images/icon_profile_place_holder.png')
+    },
+    {
+      id: '3',
+      name: 'Natalie Edwards',
+      preview: 'Haha that\'s terrifying 😂',
+      timestamp: '12/4/2023',
+      avatar: require('../../../assets/images/icon_profile_place_holder.png'),
+      hasEmoji: true
+    },
+    {
+      id: '4',
+      name: 'Dracia Vesta',
+      preview: 'Wow, this is really epic',
+      timestamp: '1/15/2023',
+      avatar: require('../../../assets/images/icon_profile_place_holder.png')
+    },
+    {
+      id: '5',
+      name: 'Annie Stacia',
+      preview: 'Haha oh man',
+      timestamp: '12/10/2023',
+      avatar: require('../../../assets/images/icon_profile_place_holder.png')
+    }
+  ];
+
   const handleMessagePress = (messageId: string) => {
-    // Mark as read and navigate to conversation
-    setMessages(prevMessages => 
-      prevMessages.map(msg => 
-        msg.id === messageId ? { ...msg, isRead: true } : msg
-      )
-    );
-    
     navigation.navigate('MessageDetail', { messageId });
   };
-  
+
   const renderItem = ({ item }: { item: Message }) => (
-    <TouchableOpacity 
-      style={[styles.messageItem, !item.isRead && styles.unreadMessage]} 
+    <TouchableOpacity
+      style={styles.messageItem}
       onPress={() => handleMessagePress(item.id)}
     >
-      <View style={styles.messageHeader}>
-        <View style={styles.avatarContainer}>
-          {item.avatar ? (
-            <Image source={{ uri: item.avatar }} style={styles.avatar} />
-          ) : (
-            <View style={styles.avatarPlaceholder}>
-              <Text style={styles.avatarText}>{item.sender.charAt(0)}</Text>
-            </View>
-          )}
-        </View>
-        <View style={styles.messageInfo}>
-          <Text style={styles.sender}>{item.sender}</Text>
+      {/* User Avatar */}
+      <Image source={item.avatar} style={styles.avatar} />
+
+      {/* Message Content */}
+      <View style={styles.messageContent}>
+        <View style={styles.messageHeader}>
+          <Text style={styles.userName}>{item.name}</Text>
           <Text style={styles.timestamp}>{item.timestamp}</Text>
         </View>
+        <Text style={styles.preview}>{item.preview}</Text>
       </View>
-      <Text style={styles.messageText} numberOfLines={2}>{item.message}</Text>
-      {!item.isRead && <View style={styles.unreadIndicator} />}
     </TouchableOpacity>
   );
-  
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top ,paddingBottom:insets.bottom}]}>
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Messages</Text>
       </View>
-      
-      {messages.length > 0 ? (
-        <FlatList
-          data={messages}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContainer}
-        />
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>{strings.noMessages || 'No messages yet'}</Text>
-        </View>
-      )}
+
+      {/* Message List */}
+      <FlatList
+        data={messages}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 };
@@ -114,96 +113,52 @@ const styles = StyleSheet.create({
     backgroundColor: Color.white,
   },
   header: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   headerTitle: {
-    fontSize: 24,
-    fontFamily: FontFamily.bold,
-    color: Color.primary,
-  },
-  listContainer: {
-    flexGrow: 1,
-    padding: 16,
-  },
-  messageItem: {
-    padding: 16,
-    marginBottom: 12,
-    backgroundColor: '#F9F9F9',
-    borderRadius: 12,
-    borderLeftWidth: 3,
-    borderLeftColor: '#E0E0E0',
-    position: 'relative',
-  },
-  unreadMessage: {
-    backgroundColor: Color.primary + '10', // Light version of primary color
-    borderLeftColor: Color.primary,
-  },
-  messageHeader: {
-    flexDirection: 'row',
-    marginBottom: 8,
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    marginRight: 10,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  avatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Color.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    color: Color.white,
-    fontSize: 18,
-    fontFamily: FontFamily.bold,
-  },
-  messageInfo: {
-    flex: 1,
-  },
-  sender: {
-    fontSize: 16,
+    fontSize: 28,
     fontFamily: FontFamily.bold,
     color: Color.black,
   },
-  messageText: {
-    fontSize: 14,
-    fontFamily: FontFamily.regular,
-    color: '#333',
+  listContainer: {
+    paddingHorizontal: 20,
+  },
+  messageItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  avatar: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    marginRight: 12,
+  },
+  messageContent: {
+    flex: 1,
+  },
+  messageHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 4,
+  },
+  userName: {
+    fontSize: 16,
+    fontFamily: FontFamily.medium,
+    color: Color.black,
   },
   timestamp: {
     fontSize: 12,
     fontFamily: FontFamily.regular,
     color: Color.placeholder,
   },
-  unreadIndicator: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Color.primary,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  emptyText: {
-    fontSize: 16,
-    fontFamily: FontFamily.medium,
+  preview: {
+    fontSize: 14,
+    fontFamily: FontFamily.regular,
     color: Color.placeholder,
-    textAlign: 'center',
-  },
+  }
 }); 

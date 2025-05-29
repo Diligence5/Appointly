@@ -124,6 +124,10 @@ export const BookingScreen = ({ navigation }: any) => {
         );
     };
 
+    const handleNotification = () => {
+        navigation.navigate('Notification');
+    };
+
     const renderBookingItem = ({ item }: { item: Booking }) => (
         <View style={styles.bookingItem}>
             {/* Date and Status */}
@@ -174,7 +178,7 @@ export const BookingScreen = ({ navigation }: any) => {
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Your Bookings</Text>
-                <TouchableOpacity style={styles.notificationButton}>
+                <TouchableOpacity style={styles.notificationButton} onPress={handleNotification}>
                     <Image
                         source={images.icon_notification_black}
                         style={styles.notificationIcon}

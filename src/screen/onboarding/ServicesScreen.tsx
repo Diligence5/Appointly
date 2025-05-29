@@ -88,7 +88,7 @@ export const ServicesScreen = ({ navigation, route }: any) => {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top ,paddingBottom:insets.bottom}]}>
       {/* Back Button */}
       <TouchableOpacity style={styles.backButton} onPress={goBack}>
         <Image

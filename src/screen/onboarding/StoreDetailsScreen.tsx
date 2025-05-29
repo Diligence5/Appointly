@@ -17,7 +17,7 @@ import images from '../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const StoreDetailsScreen = ({ navigation, route }: any) => {
-  const { userData, token } = route.params;
+  const { userData, token } = route.params || {};
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
 
@@ -45,7 +45,13 @@ export const StoreDetailsScreen = ({ navigation, route }: any) => {
   ];
 
   const handleContinue = () => {
-    // Set user as authenticated and navigate to main app
+    // If we're in the authenticated flow, just go back
+    if (!token) {
+      navigation.goBack();
+      return;
+    }
+    
+    // Otherwise, set user as authenticated and navigate to main app
     if (userData && token) {
       dispatch(setUser(userData as User));
       dispatch(setAccessToken(token));
@@ -58,7 +64,7 @@ export const StoreDetailsScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top ,paddingBottom:insets.bottom}]}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Back Button */}
         <TouchableOpacity style={styles.backButton} onPress={goBack}>

@@ -59,8 +59,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   backIcon: {
-    width: 20,
-    height: 20,
+
   },
   headerContainer: {
     marginTop: 16,

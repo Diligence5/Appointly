@@ -38,6 +38,15 @@ interface Images {
   icon_info_circle_black: ImageSourcePropType;
   icon_profile_place_holder: ImageSourcePropType;
   icon_logout_red: ImageSourcePropType;
+  icon_calendar: ImageSourcePropType;
+  icon_clock: ImageSourcePropType;
+  icon_send_message: ImageSourcePropType;
+  icon_sorting_listing_image: ImageSourcePropType;
+  icon_clock_green: ImageSourcePropType;
+  icon_call_black: ImageSourcePropType;
+  icon_map_black: ImageSourcePropType;
+  icon_star_yellow: ImageSourcePropType;
+  icon_global_black: ImageSourcePropType;
 }
 
 const images: Images = {
@@ -78,5 +87,14 @@ const images: Images = {
   icon_info_circle_black: require('./icon_info_circle_black.png'),
   icon_profile_place_holder: require('./icon_profile_place_holder.png'),
   icon_logout_red: require('./icon_logout_red.png'),
+  icon_calendar: require('./icon_profile_place_holder.png'),
+  icon_clock: require('./icon_profile_place_holder.png'),
+  icon_send_message: require('./icon_send_message.png'),
+  icon_sorting_listing_image: require('./icon_sorting_listing_image.png'),
+  icon_clock_green: require('./icon_clock_green.png'),
+  icon_call_black: require('./icon_call_black.png'),
+  icon_map_black: require('./icon_map_black.png'),
+  icon_star_yellow: require('./icon_star_yellow.png'),
+  icon_global_black: require('./icon_global_black.png'),
 };
 export default images;

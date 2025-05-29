@@ -19,6 +19,10 @@ import { StoreHoursScreen } from "../screen/onboarding/StoreHoursScreen";
 import { StoreCategoryScreen } from "../screen/onboarding/StoreCategoryScreen";
 import { BookingFeeScreen } from "../screen/onboarding/BookingFeeScreen";
 import { StaffAvailabilityScreen } from "../screen/onboarding/StaffAvailabilityScreen";
+import { NotificationScreen } from "../screen/booking/NotificationScreen";
+import { EditProfileScreen } from "../screen/profile/EditProfileScreen";
+import { AboutScreen } from "../screen/profile/AboutScreen";
+import { StoreListingScreen } from "../screen/profile/StoreListingScreen";
 import BottomTab from "./BottomTab";
 import { MessagesScreen } from "../screen/messages/MessagesScreen";
 import { MessageDetailScreen } from "../screen/messages/MessageDetailScreen";
@@ -33,21 +37,25 @@ export type RootStackParamList = {
     Login: undefined;
     Signup: undefined;
     ForgotPassword: undefined;
-    PremiumPlan: { userData: any; token: string };
-    StoreDetails: { userData: any; token: string };
-    StoreProfile: { userData: any; token: string };
-    Staff: { userData: any; token: string };
-    Services: { userData: any; token: string };
-    ServicePricing: { userData: any; token: string; selectedServices: any[] };
-    ServicesOffered: { userData: any; token: string; services: any[] };
-    BankDetails: { userData: any; token: string };
-    StoreHours: { userData: any; token: string };
-    StoreCategory: { userData: any; token: string };
-    BookingFee: { userData: any; token: string };
-    StaffAvailability: { userData: any; token: string };
+    PremiumPlan: { userData?: any; token?: string };
+    StoreDetails: { userData?: any; token?: string };
+    StoreProfile: { userData?: any; token?: string };
+    Staff: { userData?: any; token?: string };
+    Services: { userData?: any; token?: string };
+    ServicePricing: { userData?: any; token?: string; selectedServices?: any[] };
+    ServicesOffered: { userData?: any; token?: string; services?: any[] };
+    BankDetails: { userData?: any; token?: string };
+    StoreHours: { userData?: any; token?: string };
+    StoreCategory: { userData?: any; token?: string };
+    BookingFee: { userData?: any; token?: string };
+    StaffAvailability: { userData?: any; token?: string };
     MainApp: undefined;
     Messages: undefined;
     MessageDetail: { messageId: string };
+    Notification: undefined;
+    EditProfile: undefined;
+    About: undefined;
+    StoreListing: undefined;
     Tab: undefined;
     Profile: undefined;
     Booking: undefined;
@@ -111,6 +119,22 @@ function Routes(): React.JSX.Element {
                         <Stack.Screen name="MainApp" component={BottomTab} />
                         <Stack.Screen name="Messages" component={MessagesScreen} />
                         <Stack.Screen name="MessageDetail" component={MessageDetailScreen} />
+                        <Stack.Screen name="Notification" component={NotificationScreen} />
+                        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+                        <Stack.Screen name="About" component={AboutScreen} />
+                        <Stack.Screen name="StoreListing" component={StoreListingScreen} />
+                        <Stack.Screen name="PremiumPlan" component={PremiumPlanScreen} />
+                        <Stack.Screen name="StoreDetails" component={StoreDetailsScreen} />
+                        <Stack.Screen name="StoreProfile" component={StoreProfileScreen} />
+                        <Stack.Screen name="Staff" component={StaffScreen} />
+                        <Stack.Screen name="Services" component={ServicesScreen} />
+                        <Stack.Screen name="ServicePricing" component={ServicePricingScreen} />
+                        <Stack.Screen name="ServicesOffered" component={ServicesOfferedScreen} />
+                        <Stack.Screen name="BankDetails" component={BankDetailsScreen} />
+                        <Stack.Screen name="StoreHours" component={StoreHoursScreen} />
+                        <Stack.Screen name="StoreCategory" component={StoreCategoryScreen} />
+                        <Stack.Screen name="BookingFee" component={BookingFeeScreen} />
+                        <Stack.Screen name="StaffAvailability" component={StaffAvailabilityScreen} />
                     </>
                 )}
             </Stack.Navigator>
