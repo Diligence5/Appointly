@@ -11,8 +11,10 @@ import { Color } from '../../../themes/theme';
 import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 export const BankDetailsScreen = ({ navigation }: any) => {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   
   const goBack = () => {
@@ -32,14 +34,14 @@ export const BankDetailsScreen = ({ navigation }: any) => {
 
       {/* Header */}
       <View style={styles.headerContainer}>
-        <Text style={styles.title}>Bank Details</Text>
-        <Text style={styles.subtitle}>Add your banking information for payments</Text>
+        <Text style={styles.title}>{t('bank_details')}</Text>
+        <Text style={styles.subtitle}>{t('add_banking_info')}</Text>
       </View>
 
       {/* Placeholder Content */}
       <View style={styles.placeholderContainer}>
-        <Text style={styles.placeholderText}>Bank Details Screen</Text>
-        <Text style={styles.placeholderSubtext}>This screen will allow you to add banking information</Text>
+        <Text style={styles.placeholderText}>{t('bank_details_screen')}</Text>
+        <Text style={styles.placeholderSubtext}>{t('banking_info_description')}</Text>
       </View>
     </SafeAreaView>
   );

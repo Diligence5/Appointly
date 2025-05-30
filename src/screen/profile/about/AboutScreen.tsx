@@ -13,8 +13,10 @@ import { Color } from '../../../themes/theme';
 import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 export const AboutScreen = ({ navigation }: any) => {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const appVersion = '2.3.1';
@@ -55,7 +57,7 @@ export const AboutScreen = ({ navigation }: any) => {
               resizeMode="contain"
             />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>About</Text>
+          <Text style={styles.headerTitle}>{t('about')}</Text>
           <View style={styles.placeholderView} />
         </View>
 
@@ -66,15 +68,14 @@ export const AboutScreen = ({ navigation }: any) => {
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appName}>Appointly</Text>
-          <Text style={styles.versionText}>Version {appVersion}</Text>
+          <Text style={styles.appName}>{t('appointly')}</Text>
+          <Text style={styles.versionText}>{t('version')} {appVersion}</Text>
         </View>
 
         {/* App Description */}
         <View style={styles.descriptionContainer}>
           <Text style={styles.descriptionText}>
-            Appointly is a comprehensive appointment booking platform for businesses and service providers.
-            Manage your schedule, services, and clients all in one place.
+            {t('app_description')}
           </Text>
         </View>
 
@@ -87,7 +88,7 @@ export const AboutScreen = ({ navigation }: any) => {
                 style={styles.linkIcon}
               />
             </View>
-            <Text style={styles.linkText}>Visit our website</Text>
+            <Text style={styles.linkText}>{t('visit_website')}</Text>
             <Image
               source={images.icon_arrow_right_black}
               style={styles.arrowIcon}
@@ -101,7 +102,7 @@ export const AboutScreen = ({ navigation }: any) => {
                 style={styles.linkIcon}
               />
             </View>
-            <Text style={styles.linkText}>Contact support</Text>
+            <Text style={styles.linkText}>{t('contact_support')}</Text>
             <Image
               source={images.icon_arrow_right_black}
               style={styles.arrowIcon}
@@ -115,7 +116,7 @@ export const AboutScreen = ({ navigation }: any) => {
                 style={styles.linkIcon}
               />
             </View>
-            <Text style={styles.linkText}>Terms and Conditions</Text>
+            <Text style={styles.linkText}>{t('terms_conditions')}</Text>
             <Image
               source={images.icon_arrow_right_black}
               style={styles.arrowIcon}
@@ -129,7 +130,7 @@ export const AboutScreen = ({ navigation }: any) => {
                 style={styles.linkIcon}
               />
             </View>
-            <Text style={styles.linkText}>Privacy Policy</Text>
+            <Text style={styles.linkText}>{t('privacy_policy')}</Text>
             <Image
               source={images.icon_arrow_right_black}
               style={styles.arrowIcon}
@@ -140,7 +141,7 @@ export const AboutScreen = ({ navigation }: any) => {
         {/* Credits */}
         <View style={styles.creditsContainer}>
           <Text style={styles.copyrightsText}>
-            © {new Date().getFullYear()} Appointly. All rights reserved.
+            © {new Date().getFullYear()} {t('appointly')}. {t('all_rights_reserved')}
           </Text>
         </View>
       </ScrollView>

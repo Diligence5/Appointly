@@ -12,6 +12,7 @@ import { Color } from '../../themes/theme';
 import { FontFamily } from '../../constants/FontFamily';  
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import images from '../../../assets/images/images';
+import { useTranslation } from 'react-i18next';
 
 interface Message {
   id: string;
@@ -23,6 +24,7 @@ interface Message {
 }
 
 export const MessagesScreen = ({ navigation }: any) => {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   // Mock message data based on the image
@@ -31,7 +33,7 @@ export const MessagesScreen = ({ navigation }: any) => {
       id: '1',
       name: 'Haisley Junior',
       preview: 'How are you?',
-      timestamp: '2 mins ago',
+      timestamp: `2 ${t('mins_ago')}`,
       avatar: require('../../../assets/images/icon_profile_place_holder.png')
     },
     {
@@ -92,7 +94,7 @@ export const MessagesScreen = ({ navigation }: any) => {
     <SafeAreaView style={[styles.container, { paddingTop: insets.top ,paddingBottom:insets.bottom}]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Messages</Text>
+        <Text style={styles.headerTitle}>{t('messages')}</Text>
       </View>
 
       {/* Message List */}

@@ -13,8 +13,10 @@ import {
 import { Color } from '../../../themes/theme';
 import { FontFamily } from '../../../constants/FontFamily';
 import { strings } from '../../../constants/strings';
+import { useTranslation } from 'react-i18next';
 
 export const ForgotPasswordScreen = ({ navigation }: any) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -22,10 +24,10 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
-      setEmailError('Email is required');
+      setEmailError(t('email_required'));
       return false;
     } else if (!emailRegex.test(email)) {
-      setEmailError('Please enter a valid email');
+      setEmailError(t('enter_valid_email'));
       return false;
     }
     setEmailError('');
@@ -53,21 +55,21 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.header}>
-            <Text style={styles.title}>Forgot Password</Text>
+            <Text style={styles.title}>{t('forgot_password')}</Text>
             <Text style={styles.subtitle}>
               {isSubmitted 
-                ? "We've sent a password reset link to your email" 
-                : "Enter your email address to receive a reset link"}
+                ? t('password_reset_sent') 
+                : t('enter_email_for_reset')}
             </Text>
           </View>
           
           {!isSubmitted ? (
             <View style={styles.form}>
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Email</Text>
+                <Text style={styles.label}>{t('email')}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter your email"
+                  placeholder={t('enter_your_email')}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   value={email}
@@ -78,20 +80,20 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
               </View>
               
               <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
-                <Text style={styles.submitButtonText}>Send Reset Link</Text>
+                <Text style={styles.submitButtonText}>{t('send_reset_link')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.successContainer}>
               <Text style={styles.successText}>
-                Please check your email and follow the instructions to reset your password.
+                {t('check_email_instructions')}
               </Text>
             </View>
           )}
           
           <View style={styles.footer}>
             <TouchableOpacity onPress={handleBackToLogin}>
-              <Text style={styles.backToLoginText}>Back to Login</Text>
+              <Text style={styles.backToLoginText}>{t('back_to_login')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

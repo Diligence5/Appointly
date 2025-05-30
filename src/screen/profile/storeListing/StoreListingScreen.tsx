@@ -16,6 +16,7 @@ import { Color } from '../../../themes/theme';
 import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 // Types for staff and services
 interface StaffMember {
@@ -34,6 +35,7 @@ interface Service {
 }
 
 export const StoreListingScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const insets = useSafeAreaInsets();
 
     // Sample staff data
@@ -134,7 +136,7 @@ export const StoreListingScreen = ({ navigation }: any) => {
                 style={styles.bookButton}
                 onPress={() => bookStaff(item.id)}
             >
-                <Text style={styles.bookButtonText}>Book</Text>
+                <Text style={styles.bookButtonText}>{t('book')}</Text>
                 <Text style={styles.bookButtonPlus}>+</Text>
             </TouchableOpacity>
         </View>
@@ -153,7 +155,7 @@ export const StoreListingScreen = ({ navigation }: any) => {
                 style={styles.bookButton}
                 onPress={() => bookService(item.id)}
             >
-                <Text style={styles.bookButtonText}>Book</Text>
+                <Text style={styles.bookButtonText}>{t('book')}</Text>
                 <Text style={styles.bookButtonPlus}>+</Text>
             </TouchableOpacity>
         </View>
@@ -190,7 +192,7 @@ export const StoreListingScreen = ({ navigation }: any) => {
                     <View style={styles.shopStatusRow}>
                         <View style={styles.openStatusContainer}>
                             <Image source={images.icon_clock_green} resizeMode="contain" />
-                            <Text style={styles.openStatusText}>Now Open</Text>
+                            <Text style={styles.openStatusText}>{t('now_open')}</Text>
                         </View>
                         <View style={styles.ratingContainer}>
                             <Image
@@ -211,7 +213,7 @@ export const StoreListingScreen = ({ navigation }: any) => {
                                     resizeMode="contain"
                                 />
                             </View>
-                            <Text style={styles.actionText}>Website</Text>
+                            <Text style={styles.actionText}>{t('website')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={styles.actionButton} onPress={makeCall}>
@@ -222,7 +224,7 @@ export const StoreListingScreen = ({ navigation }: any) => {
                                     resizeMode="contain"
                                 />
                             </View>
-                            <Text style={styles.actionText}>Call</Text>
+                            <Text style={styles.actionText}>{t('call')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={styles.actionButton} onPress={getDirections}>
@@ -233,7 +235,7 @@ export const StoreListingScreen = ({ navigation }: any) => {
                                     resizeMode="contain"
                                 />
                             </View>
-                            <Text style={styles.actionText}>Direction</Text>
+                            <Text style={styles.actionText}>{t('direction')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={styles.actionButton} onPress={sendMessage}>
@@ -244,14 +246,19 @@ export const StoreListingScreen = ({ navigation }: any) => {
                                     resizeMode="contain"
                                 />
                             </View>
-                            <Text style={styles.actionText}>Message</Text>
+                            <Text style={styles.actionText}>{t('message')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
                 <View style={styles.horizontalLine} />
                 {/* Staff Section */}
                 <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Book A Consultation</Text>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>{t('staff')}</Text>
+                        <TouchableOpacity>
+                            <Text style={styles.viewAllText}>{t('view_all')}</Text>
+                        </TouchableOpacity>
+                    </View>
                     <FlatList
                         data={staffMembers}
                         renderItem={renderStaffItem}
@@ -262,7 +269,12 @@ export const StoreListingScreen = ({ navigation }: any) => {
 
                 {/* Services Section */}
                 <View style={[styles.sectionContainer, { marginBottom: 30 }]}>
-                    <Text style={styles.sectionTitle}>Services</Text>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>{t('services')}</Text>
+                        <TouchableOpacity>
+                            <Text style={styles.viewAllText}>{t('view_all')}</Text>
+                        </TouchableOpacity>
+                    </View>
                     <FlatList
                         data={services}
                         renderItem={renderServiceItem}
@@ -395,11 +407,21 @@ const styles = StyleSheet.create({
         marginTop: 24,
         paddingHorizontal: 16,
     },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
     sectionTitle: {
         fontSize: 18,
         fontFamily: FontFamily.bold,
         color: Color.black,
-        marginBottom: 16,
+    },
+    viewAllText: {
+        fontSize: 12,
+        fontFamily: FontFamily.medium,
+        color: Color.primary,
     },
     staffItem: {
         flexDirection: 'row',

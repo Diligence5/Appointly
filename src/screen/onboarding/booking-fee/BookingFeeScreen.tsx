@@ -11,9 +11,11 @@ import { Color } from '../../../themes/theme';
 import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 export const BookingFeeScreen = ({ navigation, route }: any) => {
   const { userData, token } = route.params;
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   
   const goBack = () => {
@@ -33,14 +35,14 @@ export const BookingFeeScreen = ({ navigation, route }: any) => {
 
       {/* Header */}
       <View style={styles.headerContainer}>
-        <Text style={styles.title}>Booking Fee</Text>
-        <Text style={styles.subtitle}>Set your booking fee percentage</Text>
+        <Text style={styles.title}>{t('booking_fee')}</Text>
+        <Text style={styles.subtitle}>{t('set_booking_fee')}</Text>
       </View>
 
       {/* Placeholder Content */}
       <View style={styles.placeholderContainer}>
-        <Text style={styles.placeholderText}>Booking Fee Screen</Text>
-        <Text style={styles.placeholderSubtext}>This screen will allow you to set your booking fee percentage</Text>
+        <Text style={styles.placeholderText}>{t('booking_fee_screen')}</Text>
+        <Text style={styles.placeholderSubtext}>{t('booking_fee_description')}</Text>
       </View>
     </SafeAreaView>
   );

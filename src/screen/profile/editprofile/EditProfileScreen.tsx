@@ -10,15 +10,17 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Color } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import images from '../../../assets/images/images';
+import { Color } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../redux/store';
-import CustomTextInput from '../../components/CustomTextInput';
+import { RootState } from '../../../redux/store';
+import CustomTextInput from '../../../components/CustomTextInput';
+import { useTranslation } from 'react-i18next';
 
 export const EditProfileScreen = ({ navigation }: any) => {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -59,7 +61,7 @@ export const EditProfileScreen = ({ navigation }: any) => {
                 resizeMode="contain"
               />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Edit Profile</Text>
+            <Text style={styles.headerTitle}>{t('edit_profile')}</Text>
             <View style={styles.placeholderView} />
           </View>
 
@@ -75,8 +77,8 @@ export const EditProfileScreen = ({ navigation }: any) => {
           <View style={styles.formContainer}>
             {/* Name Field */}
             <CustomTextInput
-              title="Full Name"
-              placeholder="Enter your full name"
+              title={t('full_name')}
+              placeholder={t('enter_full_name')}
               value={name}
               onChangeText={setName}
               containerStyle={styles.inputContainerStyle}
@@ -84,8 +86,8 @@ export const EditProfileScreen = ({ navigation }: any) => {
 
             {/* Email Field */}
             <CustomTextInput
-              title="Email Address"
-              placeholder="Enter your email address"
+              title={t('email_address')}
+              placeholder={t('enter_email')}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -94,8 +96,8 @@ export const EditProfileScreen = ({ navigation }: any) => {
 
             {/* Phone Field */}
             <CustomTextInput
-              title="Phone Number"
-              placeholder="Enter your phone number"
+              title={t('phone_number')}
+              placeholder={t('enter_phone')}
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
@@ -104,8 +106,8 @@ export const EditProfileScreen = ({ navigation }: any) => {
 
             {/* Password Field */}
             <CustomTextInput
-              title="Password"
-              placeholder="Enter your password"
+              title={t('password')}
+              placeholder={t('enter_password')}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -119,7 +121,7 @@ export const EditProfileScreen = ({ navigation }: any) => {
         {/* Save Button */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveChanges}>
-            <Text style={styles.saveButtonText}>Save Changes</Text>
+            <Text style={styles.saveButtonText}>{t('save_changes')}</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

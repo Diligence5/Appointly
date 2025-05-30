@@ -7,6 +7,7 @@ import { RootState } from '../../redux/store';
 import { clearAccessToken } from '../../redux/slices/authSlice';
 import images from '../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 // Define booking interface
 interface Booking {
@@ -23,6 +24,7 @@ interface Booking {
 }
 
 export const BookingScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const user = useSelector((state: RootState) => state.auth.user);
     const dispatch = useDispatch();
     const insets = useSafeAreaInsets();
@@ -104,15 +106,15 @@ export const BookingScreen = ({ navigation }: any) => {
 
     const handleLogout = () => {
         Alert.alert(
-            'Logout',
-            'Are you sure you want to logout?',
+            t('logout'),
+            t('are_sure_you_want_to_logout'),
             [
                 {
-                    text: 'Cancel',
+                    text: t('cancel'),
                     style: 'cancel',
                 },
                 {
-                    text: 'Logout',
+                    text: t('yes_logout'),
                     onPress: () => {
                         // Clear the authentication state
                         dispatch(clearAccessToken());
@@ -133,7 +135,7 @@ export const BookingScreen = ({ navigation }: any) => {
             {/* Date and Status */}
             <View style={styles.bookingHeader}>
                 <Text style={styles.bookingDate}>
-                    {item.date} {item.time ? `at ${item.time}` : ''}
+                    {item.date} {item.time ? `${t('at')} ${item.time}` : ''}
                 </Text>
                 <View style={[
                     styles.statusBadge,
@@ -143,7 +145,7 @@ export const BookingScreen = ({ navigation }: any) => {
                         styles.statusText,
                         item.status === 'completed' ? styles.completedText : styles.upcomingText
                     ]}>
-                        {item.status === 'completed' ? 'Completed' : 'Upcoming'}
+                        {item.status === 'completed' ? t('completed') : t('upcoming')}
                     </Text>
                 </View>
             </View>
@@ -163,11 +165,11 @@ export const BookingScreen = ({ navigation }: any) => {
             {/* Payment and Message Button */}
             <View style={styles.bookingFooter}>
                 <View>
-                    <Text style={styles.paymentLabel}>Total Payment</Text>
+                    <Text style={styles.paymentLabel}>{t('total_payment')}</Text>
                     <Text style={styles.paymentAmount}>{item.amount}</Text>
                 </View>
                 <TouchableOpacity style={styles.messageButton}>
-                    <Text style={styles.messageButtonText}>Message Client</Text>
+                    <Text style={styles.messageButtonText}>{t('message_client')}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -177,7 +179,7 @@ export const BookingScreen = ({ navigation }: any) => {
         <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Your Bookings</Text>
+                <Text style={styles.headerTitle}>{t('your_bookings')}</Text>
                 <TouchableOpacity style={styles.notificationButton} onPress={handleNotification}>
                     <Image
                         source={images.icon_notification_black}
@@ -198,7 +200,7 @@ export const BookingScreen = ({ navigation }: any) => {
                     <Text style={[
                         styles.tabText,
                         selectedTab === 'all' && styles.activeTabText
-                    ]}>All</Text>
+                    ]}>{t('all')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -208,7 +210,7 @@ export const BookingScreen = ({ navigation }: any) => {
                     <Text style={[
                         styles.tabText,
                         selectedTab === 'upcoming' && styles.activeTabText
-                    ]}>Upcoming</Text>
+                    ]}>{t('upcoming')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -218,7 +220,7 @@ export const BookingScreen = ({ navigation }: any) => {
                     <Text style={[
                         styles.tabText,
                         selectedTab === 'past' && styles.activeTabText
-                    ]}>Past</Text>
+                    ]}>{t('past')}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -231,7 +233,7 @@ export const BookingScreen = ({ navigation }: any) => {
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
                     <View style={styles.emptyState}>
-                        <Text style={styles.emptyStateText}>No bookings available</Text>
+                        <Text style={styles.emptyStateText}>{t('no_bookings_available')}</Text>
                     </View>
                 }
             />
@@ -396,7 +398,7 @@ const styles = StyleSheet.create({
     },
     paymentLabel: {
         fontSize: 12,
-        fontFamily: FontFamily.regular,
+        fontFamily: FontFamily.regular, 
         color: Color.placeholder,
         marginBottom: 4,
     },

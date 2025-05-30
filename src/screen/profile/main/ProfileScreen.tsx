@@ -8,23 +8,25 @@ import { RootState } from '../../../redux/store';
 import { clearAccessToken } from '../../../redux/slices/authSlice';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 export const ProfileScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const insets = useSafeAreaInsets();
     const user = useSelector((state: RootState) => state.auth.user);
     const dispatch = useDispatch();
 
     const handleLogout = () => {
         Alert.alert(
-            'Logout',
-            'Are you sure you want to logout?',
+            t('logout'),
+            t('logout_confirm'),
             [
                 {
-                    text: 'Cancel',
+                    text: t('cancel'),
                     style: 'cancel',
                 },
                 {
-                    text: 'Logout',
+                    text: t('logout'),
                     onPress: () => {
                         // Clear the authentication state
                         dispatch(clearAccessToken());
@@ -37,12 +39,12 @@ export const ProfileScreen = ({ navigation }: any) => {
     };
 
     const menuItems = [
-        { id: '1', title: 'Edit Profile', icon: 'edit', action: () => navigation.navigate('EditProfile') },
-        { id: '2', title: 'My Appointments', icon: 'calendar', action: () => navigation.navigate('Booking') },
-        { id: '3', title: 'Payment Methods', icon: 'credit-card', action: () => console.log('Payment Methods') },
-        { id: '4', title: 'Notifications', icon: 'bell', action: () => console.log('Notifications') },
-        { id: '5', title: 'Help & Support', icon: 'help-circle', action: () => console.log('Help & Support') },
-        { id: '6', title: 'Logout', icon: 'log-out', action: handleLogout },
+        { id: '1', title: t('edit_profile'), icon: 'edit', action: () => navigation.navigate('EditProfile') },
+        { id: '2', title: t('my_appointments'), icon: 'calendar', action: () => navigation.navigate('Booking') },
+        { id: '3', title: t('payment_methods'), icon: 'credit-card', action: () => console.log('Payment Methods') },
+        { id: '4', title: t('notification'), icon: 'bell', action: () => console.log('Notifications') },
+        { id: '5', title: t('help_support'), icon: 'help-circle', action: () => console.log('Help & Support') },
+        { id: '6', title: t('logout'), icon: 'log-out', action: handleLogout },
     ];
 
     const renderMenuItem = (item: { id: string; title: string; icon: string; action: () => void }) => (
@@ -102,7 +104,7 @@ export const ProfileScreen = ({ navigation }: any) => {
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Header */}
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Profile</Text>
+                    <Text style={styles.headerTitle}>{t('profile')}</Text>
                 </View>
 
                 {/* Profile Section */}
@@ -119,11 +121,11 @@ export const ProfileScreen = ({ navigation }: any) => {
                         )}
                         <View style={styles.profileDetails}>
                             <Text style={styles.profileName}>{user?.name || 'User'}</Text>
-                            <Text style={styles.profileEmail}>{user?.email || 'No email provided'}</Text>
+                            <Text style={styles.profileEmail}>{user?.email || t('no_email_provided')}</Text>
                         </View>
                     </View>
                     <TouchableOpacity style={styles.editButton} onPress={navigateToEditProfile}>
-                        <Text style={styles.editButtonText}>Edit</Text>
+                        <Text style={styles.editButtonText}>{t('edit')}</Text>
                         <Image source={images.icon_arrow_right_black} style={{ width: 12, height: 12 }} />
                     </TouchableOpacity>
                 </View>
@@ -138,8 +140,8 @@ export const ProfileScreen = ({ navigation }: any) => {
                             />
                         </View>
                         <View style={styles.storeListingText}>
-                            <Text style={styles.storeListingTitle}>View Store Listing</Text>
-                            <Text style={styles.storeListingSubtitle}>Vel nulla libero arcurus pellentesque</Text>
+                            <Text style={styles.storeListingTitle}>{t('view_store_listing')}</Text>
+                            <Text style={styles.storeListingSubtitle}>{t('store_subtitle')}</Text>
                         </View>
                     </View>
                     <Image
@@ -160,8 +162,8 @@ export const ProfileScreen = ({ navigation }: any) => {
                                 />
                             </View>
                             <View>
-                                <Text style={styles.settingsTitle}>Store Details</Text>
-                                <Text style={styles.settingsSubtitle}>Edit your store details, Services, Staff Details</Text>
+                                <Text style={styles.settingsTitle}>{t('store_details')}</Text>
+                                <Text style={styles.settingsSubtitle}>{t('store_details_subtitle')}</Text>
                             </View>
                         </View>
                         <Image
@@ -180,8 +182,8 @@ export const ProfileScreen = ({ navigation }: any) => {
                                 />
                             </View>
                             <View>
-                                <Text style={styles.settingsTitle}>Payment Method</Text>
-                                <Text style={styles.settingsSubtitle}>Method for your transaction</Text>
+                                <Text style={styles.settingsTitle}>{t('payment_method')}</Text>
+                                <Text style={styles.settingsSubtitle}>{t('payment_method_subtitle')}</Text>
                             </View>
                         </View>
                         <Image
@@ -200,8 +202,8 @@ export const ProfileScreen = ({ navigation }: any) => {
                                 />
                             </View>
                             <View>
-                                <Text style={styles.settingsTitle}>Subscription</Text>
-                                <Text style={styles.settingsSubtitle}>Free Trial Activated</Text>
+                                <Text style={styles.settingsTitle}>{t('subscription')}</Text>
+                                <Text style={styles.settingsSubtitle}>{t('free_trial_activated')}</Text>
                             </View>
                         </View>
                         <Image
@@ -220,8 +222,8 @@ export const ProfileScreen = ({ navigation }: any) => {
                                 />
                             </View>
                             <View>
-                                <Text style={styles.settingsTitle}>About</Text>
-                                <Text style={styles.settingsSubtitle}>Shiny 2.3.1</Text>
+                                <Text style={styles.settingsTitle}>{t('about')}</Text>
+                                <Text style={styles.settingsSubtitle}>{t('app_version')}</Text>
                             </View>
                         </View>
                         <Image
@@ -239,7 +241,7 @@ export const ProfileScreen = ({ navigation }: any) => {
                                     style={styles.settingsIcon}
                                 />
                             </View>
-                            <Text style={styles.logoutText}>Logout</Text>
+                            <Text style={styles.logoutText}>{t('logout')}</Text>
                         </View>
                         <Image
                             source={images.icon_arrow_right_black}
