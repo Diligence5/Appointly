@@ -8,7 +8,7 @@ import { Color } from "../themes/theme";
 import images from "../../assets/images/images";
 import { BookingScreen } from "../screen/booking/BookingScreen";
 import { MessagesScreen } from "../screen/messages/MessagesScreen";
-import { ProfileScreen } from "../screen/profile/ProfileScreen";
+import { ProfileScreen } from "../screen/profile/main/ProfileScreen";
 import { strings, Messages } from "../constants/strings";
 
 

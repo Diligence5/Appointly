@@ -7,13 +7,12 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { Color } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import images from '../../../assets/images/images';
+import { Color } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export const StoreCategoryScreen = ({ navigation, route }: any) => {
-  const { userData, token } = route.params;
+export const BankDetailsScreen = ({ navigation }: any) => {
   const insets = useSafeAreaInsets();
   
   const goBack = () => {
@@ -33,14 +32,14 @@ export const StoreCategoryScreen = ({ navigation, route }: any) => {
 
       {/* Header */}
       <View style={styles.headerContainer}>
-        <Text style={styles.title}>Store Category</Text>
-        <Text style={styles.subtitle}>Select your store category</Text>
+        <Text style={styles.title}>Bank Details</Text>
+        <Text style={styles.subtitle}>Add your banking information for payments</Text>
       </View>
 
       {/* Placeholder Content */}
       <View style={styles.placeholderContainer}>
-        <Text style={styles.placeholderText}>Store Category Screen</Text>
-        <Text style={styles.placeholderSubtext}>This screen will allow you to select your store category</Text>
+        <Text style={styles.placeholderText}>Bank Details Screen</Text>
+        <Text style={styles.placeholderSubtext}>This screen will allow you to add banking information</Text>
       </View>
     </SafeAreaView>
   );

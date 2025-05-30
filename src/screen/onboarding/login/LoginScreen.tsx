@@ -12,14 +12,14 @@ import {
     Image,
     Alert,
 } from 'react-native';
-import { Color, FontSizes } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import { strings } from '../../constants/strings';
-import images from '../../../assets/images/images';
+import { Color, FontSizes } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
+import { strings } from '../../../constants/strings';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
-import { setAccessToken, setUser } from '../../redux/slices/authSlice';
-import { User } from '../../interface/UserInterface';
+import { setAccessToken, setUser } from '../../../redux/slices/authSlice';
+import { User } from '../../../interface/UserInterface';
 
 export const LoginScreen = ({ navigation }: any) => {
     const [email, setEmail] = useState('');

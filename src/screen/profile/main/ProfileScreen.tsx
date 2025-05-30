@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
-import { Color } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import { strings } from '../../constants/strings';
+import { Color } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
+import { strings } from '../../../constants/strings';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../redux/store';
-import { clearAccessToken } from '../../redux/slices/authSlice';
-import images from '../../../assets/images/images';
+import { RootState } from '../../../redux/store';
+import { clearAccessToken } from '../../../redux/slices/authSlice';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const ProfileScreen = ({ navigation }: any) => {

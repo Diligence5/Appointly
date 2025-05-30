@@ -8,11 +8,11 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import { Color } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import images from '../../../assets/images/images';
+import { Color } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import CustomTextInput from '../../components/CustomTextInput';
+import CustomTextInput from '../../../components/CustomTextInput';
 
 // Define service interface
 interface Service {

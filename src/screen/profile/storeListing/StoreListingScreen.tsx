@@ -12,9 +12,9 @@ import {
     Linking,
     StatusBar,
 } from 'react-native';
-import { Color } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import images from '../../../assets/images/images';
+import { Color } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Types for staff and services

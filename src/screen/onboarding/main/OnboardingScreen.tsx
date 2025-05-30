@@ -9,11 +9,11 @@ import {
   TouchableOpacity,
   Image
 } from 'react-native';
-import { Color, FontSizes } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import images from '../../../assets/images/images';
+import { Color, FontSizes } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import CustomButton from '../../components/CustomButton';
+import CustomButton from '../../../components/CustomButton';
 
 const { width, height } = Dimensions.get('window');
 

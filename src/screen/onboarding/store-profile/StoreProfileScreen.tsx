@@ -8,14 +8,14 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import { Color } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
+import { Color } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
 import { useDispatch } from 'react-redux';
-import { setAccessToken, setUser } from '../../redux/slices/authSlice';
-import { User } from '../../interface/UserInterface';
-import images from '../../../assets/images/images';
+import { setAccessToken, setUser } from '../../../redux/slices/authSlice';
+import { User } from '../../../interface/UserInterface';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import CustomTextInput from '../../components/CustomTextInput';
+import CustomTextInput from '../../../components/CustomTextInput';
 
 export const StoreProfileScreen = ({ navigation, route }: any) => {
   const { userData, token } = route.params;

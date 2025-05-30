@@ -7,12 +7,13 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { Color } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import images from '../../../assets/images/images';
+import { Color } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export const BankDetailsScreen = ({ navigation }: any) => {
+export const BookingFeeScreen = ({ navigation, route }: any) => {
+  const { userData, token } = route.params;
   const insets = useSafeAreaInsets();
   
   const goBack = () => {
@@ -32,14 +33,14 @@ export const BankDetailsScreen = ({ navigation }: any) => {
 
       {/* Header */}
       <View style={styles.headerContainer}>
-        <Text style={styles.title}>Bank Details</Text>
-        <Text style={styles.subtitle}>Add your banking information for payments</Text>
+        <Text style={styles.title}>Booking Fee</Text>
+        <Text style={styles.subtitle}>Set your booking fee percentage</Text>
       </View>
 
       {/* Placeholder Content */}
       <View style={styles.placeholderContainer}>
-        <Text style={styles.placeholderText}>Bank Details Screen</Text>
-        <Text style={styles.placeholderSubtext}>This screen will allow you to add banking information</Text>
+        <Text style={styles.placeholderText}>Booking Fee Screen</Text>
+        <Text style={styles.placeholderSubtext}>This screen will allow you to set your booking fee percentage</Text>
       </View>
     </SafeAreaView>
   );

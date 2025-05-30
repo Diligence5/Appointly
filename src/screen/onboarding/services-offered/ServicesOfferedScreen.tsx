@@ -9,9 +9,9 @@ import {
   ScrollView,
   FlatList,
 } from 'react-native';
-import { Color } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import images from '../../../assets/images/images';
+import { Color } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Define complete service interface
@@ -57,7 +57,7 @@ export const ServicesOfferedScreen = ({ navigation, route }: any) => {
     <View style={styles.serviceItem}>
       <View style={styles.serviceImageContainer}>
         <Image
-          source={require('../../../assets/images/icon_profile_place_holder.png')}
+          source={images.icon_profile_place_holder}
           style={styles.serviceImage}
           resizeMode="cover"
         />

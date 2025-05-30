@@ -7,12 +7,12 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { Color } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import images from '../../../assets/images/images';
+import { Color } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export const BookingFeeScreen = ({ navigation, route }: any) => {
+export const StoreCategoryScreen = ({ navigation, route }: any) => {
   const { userData, token } = route.params;
   const insets = useSafeAreaInsets();
   
@@ -33,14 +33,14 @@ export const BookingFeeScreen = ({ navigation, route }: any) => {
 
       {/* Header */}
       <View style={styles.headerContainer}>
-        <Text style={styles.title}>Booking Fee</Text>
-        <Text style={styles.subtitle}>Set your booking fee percentage</Text>
+        <Text style={styles.title}>Store Category</Text>
+        <Text style={styles.subtitle}>Select your store category</Text>
       </View>
 
       {/* Placeholder Content */}
       <View style={styles.placeholderContainer}>
-        <Text style={styles.placeholderText}>Booking Fee Screen</Text>
-        <Text style={styles.placeholderSubtext}>This screen will allow you to set your booking fee percentage</Text>
+        <Text style={styles.placeholderText}>Store Category Screen</Text>
+        <Text style={styles.placeholderSubtext}>This screen will allow you to select your store category</Text>
       </View>
     </SafeAreaView>
   );

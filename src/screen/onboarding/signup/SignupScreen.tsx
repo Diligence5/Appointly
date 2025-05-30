@@ -12,14 +12,14 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { Color } from '../../themes/theme';
-import { FontFamily } from '../../constants/FontFamily';
-import { strings } from '../../constants/strings';
-import images from '../../../assets/images/images';
+import { Color } from '../../../themes/theme';
+import { FontFamily } from '../../../constants/FontFamily';
+import { strings } from '../../../constants/strings';
+import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
-import { setAccessToken, setUser } from '../../redux/slices/authSlice';
-import { User } from '../../interface/UserInterface';
+import { setAccessToken, setUser } from '../../../redux/slices/authSlice';
+import { User } from '../../../interface/UserInterface';
 
 export const SignupScreen = ({ navigation }: any) => {
   const [name, setName] = useState('');
