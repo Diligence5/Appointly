@@ -13,6 +13,7 @@ import { Color } from '../../../themes/theme';
 import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 // Define complete service interface
 interface Service {
@@ -26,6 +27,7 @@ interface Service {
 export const ServicesOfferedScreen = ({ navigation, route }: any) => {
   const { userData, token, services } = route.params;
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   
   const goBack = () => {
     navigation.goBack();
@@ -83,8 +85,8 @@ export const ServicesOfferedScreen = ({ navigation, route }: any) => {
 
         {/* Header */}
         <View style={styles.headerContainer}>
-          <Text style={styles.title}>Services Offered</Text>
-          <Text style={styles.subtitle}>Add your store's services</Text>
+          <Text style={styles.title}>{t('services_offered')}</Text>
+          <Text style={styles.subtitle}>{t('add_your_store_services')}</Text>
         </View>
 
         {/* Services List */}
@@ -102,7 +104,7 @@ export const ServicesOfferedScreen = ({ navigation, route }: any) => {
           style={styles.editButton} 
           onPress={handleEditServices}
         >
-          <Text style={styles.editButtonText}>Edit Services</Text>
+          <Text style={styles.editButtonText}>{t('edit_services')}</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -112,7 +114,7 @@ export const ServicesOfferedScreen = ({ navigation, route }: any) => {
           style={styles.continueButton} 
           onPress={handleContinue}
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>{t('continue')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

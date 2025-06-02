@@ -14,6 +14,7 @@ import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomButton from '../../../components/CustomButton';
+import { useTranslation } from 'react-i18next';
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,6 +26,7 @@ interface OnboardingItem {
 }
 
 export const OnboardingScreen = ({ navigation }: any) => {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
@@ -32,20 +34,20 @@ export const OnboardingScreen = ({ navigation }: any) => {
   const onboardingData: OnboardingItem[] = [
     {
       id: '1',
-      title: 'Browse a wide range of services and treatments',
-      description: 'Lorem ipsum dolor sit amet consectetur. Sagittis massa faucibus volutpat viverra ut. Pharetra iaculis amet faucibus praesent eros faucibus.',
+      title: t('browse_services_title'),
+      description: t('browse_services_description'),
       image: images.icon_onboarding_image_one,
     },
     {
       id: '2',
-      title: 'Book with Ease',
-      description: 'Search, select, and book appointments with just a few taps,Search, select, and book appointments with just a few taps',
+      title: t('book_with_ease_title'),
+      description: t('book_with_ease_description'),
       image: images.icon_onboarding_image_two,
     },
     {
       id: '3',
-      title: 'Stay Connected',
-      description: 'Get reminders and updates about your upcoming appointments',
+      title: t('stay_connected_title'),
+      description: t('stay_connected_description'),
       image: images.icon_onboarding_image_three,
     },
   ];
@@ -82,7 +84,7 @@ export const OnboardingScreen = ({ navigation }: any) => {
         
         <View style={styles.buttonContainer}>
           <CustomButton
-            title="Continue"
+            title={t('continue')}
             onPress={handleNext}
             loading={false}
             buttonStyle={styles.continueButton}
@@ -92,7 +94,7 @@ export const OnboardingScreen = ({ navigation }: any) => {
             style={styles.loginButton}
             onPress={handleLogin}
           >
-            <Text style={styles.loginButtonText}>Login to Your Account</Text>
+            <Text style={styles.loginButtonText}>{t('login_to_your_account')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -233,3 +235,4 @@ const styles = StyleSheet.create({
     color: Color.black,
   },
 });
+ 

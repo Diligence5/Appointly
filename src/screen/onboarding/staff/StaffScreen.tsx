@@ -13,10 +13,12 @@ import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomTextInput from '../../../components/CustomTextInput';
+import { useTranslation } from 'react-i18next';
 
 export const StaffScreen = ({ navigation, route }: any) => {
   const { userData, token } = route.params;
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   
   // Form state
   const [fullName, setFullName] = useState('Anthony Philips');
@@ -69,15 +71,15 @@ export const StaffScreen = ({ navigation, route }: any) => {
 
         {/* Header */}
         <View style={styles.headerContainer}>
-          <Text style={styles.title}>Add Staff Members</Text>
-          <Text style={styles.subtitle}>Add Team Profiles</Text>
+          <Text style={styles.title}>{t('add_staff_members')}</Text>
+          <Text style={styles.subtitle}>{t('add_team_profiles')}</Text>
         </View>
 
         {/* Form Fields */}
         <View style={styles.formContainer}>
           {/* Full Name */}
           <CustomTextInput
-            title="Full Name"
+            title={t('full_name')}
             value={fullName}
             onChangeText={setFullName}
             containerStyle={styles.inputContainer}
@@ -85,7 +87,7 @@ export const StaffScreen = ({ navigation, route }: any) => {
           
           {/* Role/Title */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Role/Title (e.g., Senior Stylist, Junior Barber)</Text>
+            <Text style={styles.fieldLabel}>{t('role_title')}</Text>
             <CustomTextInput
               value={role}
               onChangeText={setRole}
@@ -96,9 +98,9 @@ export const StaffScreen = ({ navigation, route }: any) => {
           
           {/* Availability */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Availability</Text>
+            <Text style={styles.fieldLabel}>{t('availability')}</Text>
             <TouchableOpacity style={styles.selectionItem} onPress={navigateToAvailability}>
-              <Text style={styles.selectionText}>Setup working hours/days</Text>
+              <Text style={styles.selectionText}>{t('setup_working_hours')}</Text>
               <Image
                 source={images.icon_arrow_right_black}
                 style={styles.arrowIcon}
@@ -109,9 +111,9 @@ export const StaffScreen = ({ navigation, route }: any) => {
           
           {/* Profile Picture */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Profile Picture</Text>
+            <Text style={styles.fieldLabel}>{t('profile_picture')}</Text>
             <TouchableOpacity style={styles.photoSelector} onPress={handleChoosePhoto}>
-              <Text style={styles.photoText}>Choose a photo</Text>
+              <Text style={styles.photoText}>{t('choose_photo')}</Text>
               <View style={styles.addButton}>
                 <Text style={styles.addButtonText}>+</Text>
               </View>
@@ -120,7 +122,7 @@ export const StaffScreen = ({ navigation, route }: any) => {
           
           {/* Consultation Fee */}
           <CustomTextInput
-            title="Consultation Fee"
+            title={t('consultation_fee')}
             value={consultationFee}
             onChangeText={setConsultationFee}
             containerStyle={styles.inputContainer}
@@ -132,7 +134,7 @@ export const StaffScreen = ({ navigation, route }: any) => {
       {/* Save Button */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save</Text>
+          <Text style={styles.saveButtonText}>{t('save')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

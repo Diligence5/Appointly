@@ -13,6 +13,7 @@ import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomTextInput from '../../../components/CustomTextInput';
+import { useTranslation } from 'react-i18next';
 
 // Define service interface
 interface Service {
@@ -27,6 +28,7 @@ interface Service {
 export const ServicePricingScreen = ({ navigation, route }: any) => {
   const { userData, token, selectedServices } = route.params;
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   // Initial services list with pricing fields
   const [services, setServices] = useState<Service[]>(
@@ -100,8 +102,8 @@ export const ServicePricingScreen = ({ navigation, route }: any) => {
 
         {/* Header */}
         <View style={styles.headerContainer}>
-          <Text style={styles.title}>Add Price & Duration</Text>
-          <Text style={styles.subtitle}>Add your store's services</Text>
+          <Text style={styles.title}>{t('add_price_duration')}</Text>
+          <Text style={styles.subtitle}>{t('add_your_store_services')}</Text>
         </View>
 
         {/* Services List */}
@@ -128,7 +130,7 @@ export const ServicePricingScreen = ({ navigation, route }: any) => {
               <View style={styles.serviceDetails}>
                 <View style={styles.row}>
                   <View style={styles.column}>
-                    <Text style={styles.label}>Price</Text>
+                    <Text style={styles.label}>{t('price')}</Text>
                     <CustomTextInput
                       value={service.price}
                       onChangeText={(text) => updateServicePrice(service.id, text)}
@@ -137,7 +139,7 @@ export const ServicePricingScreen = ({ navigation, route }: any) => {
                     />
                   </View>
                   <View style={styles.column}>
-                    <Text style={styles.label}>Duration</Text>
+                    <Text style={styles.label}>{t('duration')}</Text>
                     <CustomTextInput
                       value={service.duration}
                       onChangeText={(text) => updateServiceDuration(service.id, text)}
@@ -157,7 +159,7 @@ export const ServicePricingScreen = ({ navigation, route }: any) => {
           style={styles.saveButton}
           onPress={handleSave}
         >
-          <Text style={styles.saveButtonText}>Save</Text>
+          <Text style={styles.saveButtonText}>{t('save')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

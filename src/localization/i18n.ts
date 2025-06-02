@@ -44,7 +44,7 @@ const handleLocalizationChange = (): void => {
   console.log('Device language:', languageTag);
   console.log('Available languages:', Object.keys(resources));
   if (Object.keys(resources).includes(languageTag)) {
-    i18next.changeLanguage(languageTag);
+  i18next.changeLanguage(languageTag);
     console.log('Set language to:', languageTag);
   } else {
     i18next.changeLanguage('en');

@@ -16,132 +16,91 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 export const AboutScreen = ({ navigation }: any) => {
-  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
-  const appVersion = '2.3.1';
+  const APP_VERSION = '1.0.0'; // This would come from your app config
+
+  const menuItems = [
+    {
+      id: 'terms',
+      title: t('terms_of_service'),
+      onPress: () => Linking.openURL('https://example.com/terms'),
+    },
+    {
+      id: 'privacy',
+      title: t('privacy_policy'),
+      onPress: () => Linking.openURL('https://example.com/privacy'),
+    },
+    {
+      id: 'contact',
+      title: t('contact_us'),
+      onPress: () => Linking.openURL('mailto:support@appointly.com'),
+    },
+    {
+      id: 'rate',
+      title: t('rate_the_app'),
+      onPress: () => Linking.openURL('https://example.com/rate'),
+    },
+  ];
 
   const goBack = () => {
     navigation.goBack();
   };
 
-  const openTermsAndConditions = () => {
-    // Open terms and conditions URL
-    Linking.openURL('https://appointly.com/terms');
-  };
-
-  const openPrivacyPolicy = () => {
-    // Open privacy policy URL
-    Linking.openURL('https://appointly.com/privacy');
-  };
-
-  const openWebsite = () => {
-    // Open website URL
-    Linking.openURL('https://appointly.com');
-  };
-
-  const contactSupport = () => {
-    // Open email client with support email
-    Linking.openURL('mailto:support@appointly.com');
-  };
-
   return (
     <SafeAreaView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={goBack} style={styles.backButton}>
-            <Image
-              source={images.icon_back_press_arrow}
-              style={styles.backIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('about')}</Text>
-          <View style={styles.placeholderView} />
-        </View>
-
-        {/* App Logo */}
-        <View style={styles.logoContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Back Button */}
+        <TouchableOpacity style={styles.backButton} onPress={goBack}>
           <Image
-            source={images.icon_profile_place_holder} // Replace with actual app logo
-            style={styles.logo}
+            source={images.icon_back_press_arrow}
+            style={styles.backIcon}
             resizeMode="contain"
           />
-          <Text style={styles.appName}>{t('appointly')}</Text>
-          <Text style={styles.versionText}>{t('version')} {appVersion}</Text>
+        </TouchableOpacity>
+
+        {/* Header */}
+        <View style={styles.headerContainer}>
+          <Text style={styles.title}>{t('about')}</Text>
         </View>
 
-        {/* App Description */}
-        <View style={styles.descriptionContainer}>
-          <Text style={styles.descriptionText}>
+        {/* App Info */}
+        <View style={styles.appInfoContainer}>
+          <Image
+            source={images.icon_profile_place_holder}
+            style={styles.appLogo}
+            resizeMode="contain"
+          />
+          <Text style={styles.appName}>Appointly</Text>
+          <Text style={styles.appVersion}>Version {APP_VERSION}</Text>
+          <Text style={styles.appDescription}>
             {t('app_description')}
           </Text>
         </View>
 
-        {/* Links Section */}
-        <View style={styles.linksContainer}>
-          <TouchableOpacity style={styles.linkItem} onPress={openWebsite}>
-            <View style={styles.linkIconContainer}>
+        {/* Menu Items */}
+        <View style={styles.menuContainer}>
+          {menuItems.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.menuItem}
+              onPress={item.onPress}
+            >
+              <Text style={styles.menuItemText}>{item.title}</Text>
               <Image
-                source={images.icon_info_circle_black}
-                style={styles.linkIcon}
+                source={images.icon_arrow_right_black}
+                style={styles.arrowIcon}
+                resizeMode="contain"
               />
-            </View>
-            <Text style={styles.linkText}>{t('visit_website')}</Text>
-            <Image
-              source={images.icon_arrow_right_black}
-              style={styles.arrowIcon}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.linkItem} onPress={contactSupport}>
-            <View style={styles.linkIconContainer}>
-              <Image
-                source={images.icon_info_circle_black}
-                style={styles.linkIcon}
-              />
-            </View>
-            <Text style={styles.linkText}>{t('contact_support')}</Text>
-            <Image
-              source={images.icon_arrow_right_black}
-              style={styles.arrowIcon}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.linkItem} onPress={openTermsAndConditions}>
-            <View style={styles.linkIconContainer}>
-              <Image
-                source={images.icon_info_circle_black}
-                style={styles.linkIcon}
-              />
-            </View>
-            <Text style={styles.linkText}>{t('terms_conditions')}</Text>
-            <Image
-              source={images.icon_arrow_right_black}
-              style={styles.arrowIcon}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.linkItem} onPress={openPrivacyPolicy}>
-            <View style={styles.linkIconContainer}>
-              <Image
-                source={images.icon_info_circle_black}
-                style={styles.linkIcon}
-              />
-            </View>
-            <Text style={styles.linkText}>{t('privacy_policy')}</Text>
-            <Image
-              source={images.icon_arrow_right_black}
-              style={styles.arrowIcon}
-            />
-          </TouchableOpacity>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {/* Credits */}
-        <View style={styles.creditsContainer}>
-          <Text style={styles.copyrightsText}>
-            © {new Date().getFullYear()} {t('appointly')}. {t('all_rights_reserved')}
+        {/* Footer */}
+        <View style={styles.footerContainer}>
+          <Text style={styles.footerText}>
+            © {new Date().getFullYear()} Appointly. {t('all_rights_reserved')}
           </Text>
         </View>
       </ScrollView>
@@ -154,84 +113,71 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Color.white,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
   },
   backButton: {
-
+    marginTop: 16,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
   },
   backIcon: {
 
   },
-  headerTitle: {
-    fontSize: 18,
-    fontFamily: FontFamily.medium,
+  headerContainer: {
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontFamily: FontFamily.bold,
     color: Color.black,
   },
-  placeholderView: {
-    width: 36, // Same width as backButton for alignment
-  },
-  logoContainer: {
+  appInfoContainer: {
     alignItems: 'center',
-    marginVertical: 32,
+    marginBottom: 32,
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: Color.border,
   },
-  logo: {
+  appLogo: {
     width: 80,
     height: 80,
-    borderRadius: 16,
     marginBottom: 16,
   },
   appName: {
     fontSize: 24,
     fontFamily: FontFamily.bold,
     color: Color.black,
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  versionText: {
+  appVersion: {
     fontSize: 14,
     fontFamily: FontFamily.regular,
     color: Color.placeholder,
+    marginBottom: 16,
   },
-  descriptionContainer: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
-  },
-  descriptionText: {
-    fontSize: 16,
+  appDescription: {
+    fontSize: 14,
     fontFamily: FontFamily.regular,
     color: Color.black,
-    lineHeight: 24,
     textAlign: 'center',
+    lineHeight: 22,
   },
-  linksContainer: {
-    paddingHorizontal: 20,
+  menuContainer: {
+    marginBottom: 32,
   },
-  linkItem: {
+  menuItem: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: Color.border,
   },
-  linkIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Color.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  linkIcon: {
-    width: 24,
-    height: 24,
-  },
-  linkText: {
-    flex: 1,
+  menuItemText: {
     fontSize: 16,
     fontFamily: FontFamily.medium,
     color: Color.black,
@@ -239,15 +185,17 @@ const styles = StyleSheet.create({
   arrowIcon: {
     width: 16,
     height: 16,
+    tintColor: '#AAAAAA',
   },
-  creditsContainer: {
-    marginTop: 40,
+  footerContainer: {
+    marginTop: 'auto',
     marginBottom: 24,
     alignItems: 'center',
   },
-  copyrightsText: {
-    fontSize: 14,
+  footerText: {
+    fontSize: 12,
     fontFamily: FontFamily.regular,
     color: Color.placeholder,
+    textAlign: 'center',
   },
 }); 

@@ -15,31 +15,33 @@ import { setAccessToken, setUser } from '../../../redux/slices/authSlice';
 import { User } from '../../../interface/UserInterface';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 export const StoreDetailsScreen = ({ navigation, route }: any) => {
   const { userData, token } = route.params || {};
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   const menuItems = [
     {
       id: 'store_profile',
-      title: 'Store Profile',
+      title: t('store_profile'),
       onPress: () => navigation.navigate('StoreProfile', { userData, token }),
     },
     {
       id: 'staff',
-      title: 'Staff',
+      title: t('staff'),
       onPress: () => navigation.navigate('Staff', { userData, token }),
     },
     {
       id: 'services',
-      title: 'Services',
+      title: t('services'),
       onPress: () => navigation.navigate('Services', { userData, token }),
     },
     {
       id: 'bank_details',
-      title: 'Bank Details',
+      title: t('bank_details'),
       onPress: () => navigation.navigate('BankDetails', { userData, token }),
     },
   ];
@@ -77,8 +79,8 @@ export const StoreDetailsScreen = ({ navigation, route }: any) => {
 
         {/* Header */}
         <View style={styles.headerContainer}>
-          <Text style={styles.title}>Store Details</Text>
-          <Text style={styles.subtitle}>Setup your store details, services, staff</Text>
+          <Text style={styles.title}>{t('store_details')}</Text>
+          <Text style={styles.subtitle}>{t('store_details_subtitle')}</Text>
         </View>
 
         {/* Menu Items */}
@@ -103,7 +105,7 @@ export const StoreDetailsScreen = ({ navigation, route }: any) => {
       {/* Continue Button */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>{t('continue')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

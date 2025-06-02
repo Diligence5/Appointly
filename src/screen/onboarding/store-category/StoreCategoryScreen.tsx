@@ -11,10 +11,12 @@ import { Color } from '../../../themes/theme';
 import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 export const StoreCategoryScreen = ({ navigation, route }: any) => {
   const { userData, token } = route.params;
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   
   const goBack = () => {
     navigation.goBack();
@@ -33,14 +35,14 @@ export const StoreCategoryScreen = ({ navigation, route }: any) => {
 
       {/* Header */}
       <View style={styles.headerContainer}>
-        <Text style={styles.title}>Store Category</Text>
-        <Text style={styles.subtitle}>Select your store category</Text>
+        <Text style={styles.title}>{t('store_category')}</Text>
+        <Text style={styles.subtitle}>{t('select_your_store_category')}</Text>
       </View>
 
       {/* Placeholder Content */}
       <View style={styles.placeholderContainer}>
-        <Text style={styles.placeholderText}>Store Category Screen</Text>
-        <Text style={styles.placeholderSubtext}>This screen will allow you to select your store category</Text>
+        <Text style={styles.placeholderText}>{t('store_category_screen')}</Text>
+        <Text style={styles.placeholderSubtext}>{t('store_category_description')}</Text>
       </View>
     </SafeAreaView>
   );

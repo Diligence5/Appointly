@@ -12,6 +12,7 @@ import { Color } from '../../../themes/theme';
 import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 // Define time slot interface
 interface TimeSlot {
@@ -30,41 +31,42 @@ interface DaySchedule {
 export const StoreHoursScreen = ({ navigation, route }: any) => {
   const { userData, token } = route.params;
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   // Initial schedule data
   const [schedule, setSchedule] = useState<DaySchedule[]>([
     {
-      day: 'Mon',
+      day: t('mon'),
       isOpen: true,
       timeSlots: [{ id: 'mon-1', open: '9:00 AM', close: '12:00 PM' }]
     },
     {
-      day: 'Tue',
+      day: t('tue'),
       isOpen: true,
       timeSlots: [{ id: 'tue-1', open: '9:00 AM', close: '12:00 PM' }]
     },
     {
-      day: 'Wed',
+      day: t('wed'),
       isOpen: true,
       timeSlots: [{ id: 'wed-1', open: '9:00 AM', close: '12:00 PM' }]
     },
     {
-      day: 'Thu',
+      day: t('thu'),
       isOpen: true,
       timeSlots: [{ id: 'thu-1', open: '9:00 AM', close: '12:00 PM' }]
     },
     {
-      day: 'Fri',
+      day: t('fri'),
       isOpen: true,
       timeSlots: [{ id: 'fri-1', open: '9:00 AM', close: '12:00 PM' }]
     },
     {
-      day: 'Sat',
+      day: t('sat'),
       isOpen: false,
       timeSlots: []
     },
     {
-      day: 'Sun',
+      day: t('sun'),
       isOpen: false,
       timeSlots: []
     }
@@ -137,8 +139,8 @@ export const StoreHoursScreen = ({ navigation, route }: any) => {
 
         {/* Header */}
         <View style={styles.headerContainer}>
-          <Text style={styles.title}>Store Working Hours</Text>
-          <Text style={styles.subtitle}>Please select your shop's opening and closing times.</Text>
+          <Text style={styles.title}>{t('store_working_hours')}</Text>
+          <Text style={styles.subtitle}>{t('select_opening_closing_times')}</Text>
         </View>
 
         {/* Days of week */}
@@ -206,11 +208,11 @@ export const StoreHoursScreen = ({ navigation, route }: any) => {
                     style={styles.addAnotherButton}
                     onPress={() => addTimeSlot(dayIndex)}
                   >
-                    <Text style={styles.addAnotherText}>Add another</Text>
+                    <Text style={styles.addAnotherText}>{t('add_another')}</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
-                <Text style={styles.closedText}>Closed</Text>
+                <Text style={styles.closedText}>{t('closed')}</Text>
               )}
             </View>
           ))}
@@ -220,7 +222,7 @@ export const StoreHoursScreen = ({ navigation, route }: any) => {
       {/* Save Button */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save</Text>
+          <Text style={styles.saveButtonText}>{t('save')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

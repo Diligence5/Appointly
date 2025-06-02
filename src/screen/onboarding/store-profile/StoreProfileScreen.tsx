@@ -16,11 +16,13 @@ import { User } from '../../../interface/UserInterface';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomTextInput from '../../../components/CustomTextInput';
+import { useTranslation } from 'react-i18next';
 
 export const StoreProfileScreen = ({ navigation, route }: any) => {
   const { userData, token } = route.params;
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   // Form state
   const [storeName, setStoreName] = useState('Barber Street');
@@ -94,49 +96,49 @@ export const StoreProfileScreen = ({ navigation, route }: any) => {
 
         {/* Header */}
         <View style={styles.headerContainer}>
-          <Text style={styles.title}>Setup your store profile</Text>
-          <Text style={styles.subtitle}>Add Store Details</Text>
+          <Text style={styles.title}>{t('setup_store_profile')}</Text>
+          <Text style={styles.subtitle}>{t('add_store_details')}</Text>
         </View>
 
         {/* Form Fields */}
         <View style={styles.formContainer}>
           <CustomTextInput
-            title="Store/Salon Name"
+            title={t('store_salon_name')}
             value={storeName}
             onChangeText={setStoreName}
             containerStyle={styles.inputContainer}
           />
 
           <CustomTextInput
-            title="Store/Salon Address"
+            title={t('store_salon_address')}
             value={storeAddress}
             onChangeText={setStoreAddress}
             containerStyle={styles.inputContainer}
           />
 
           <CustomTextInput
-            title="City"
+            title={t('city')}
             value={city}
             onChangeText={setCity}
             containerStyle={styles.inputContainer}
           />
 
           <CustomTextInput
-            title="Postcode"
+            title={t('postcode')}
             value={postcode}
             onChangeText={setPostcode}
             containerStyle={styles.inputContainer}
           />
 
           <CustomTextInput
-            title="Country"
+            title={t('country')}
             value={country}
             onChangeText={setCountry}
             containerStyle={styles.inputContainer}
           />
 
           <CustomTextInput
-            title="Phone number"
+            title={t('phone_number')}
             value={phoneNumber}
             onChangeText={setPhoneNumber}
             containerStyle={styles.inputContainer}
@@ -144,7 +146,7 @@ export const StoreProfileScreen = ({ navigation, route }: any) => {
           />
 
           <CustomTextInput
-            title="Website (Optional)"
+            title={t('website_optional')}
             value={website}
             onChangeText={setWebsite}
             containerStyle={styles.inputContainer}
@@ -152,7 +154,7 @@ export const StoreProfileScreen = ({ navigation, route }: any) => {
           />
 
           <CustomTextInput
-            title="Store Description"
+            title={t('store_description')}
             value={storeDescription}
             onChangeText={setStoreDescription}
             containerStyle={styles.inputContainer}
@@ -162,7 +164,7 @@ export const StoreProfileScreen = ({ navigation, route }: any) => {
           />
 
           {/* Booking Fee */}
-          <Text style={styles.sectionTitle}>Booking Fee<Text style={styles.requiredStar}>*</Text></Text>
+          <Text style={styles.sectionTitle}>{t('booking_fee')}<Text style={styles.requiredStar}>*</Text></Text>
           <TouchableOpacity style={styles.selectionItem} onPress={navigateToBookingFee}>
             <Text style={styles.selectionText}>{bookingFee}</Text>
             <Image
@@ -173,9 +175,9 @@ export const StoreProfileScreen = ({ navigation, route }: any) => {
           </TouchableOpacity>
 
           {/* Store Hours */}
-          <Text style={styles.sectionTitle}>Store Hours</Text>
+          <Text style={styles.sectionTitle}>{t('store_hours')}</Text>
           <TouchableOpacity style={styles.selectionItem} onPress={navigateToHours}>
-            <Text style={styles.selectionText}>Setup working hours/days</Text>
+            <Text style={styles.selectionText}>{t('setup_working_hours')}</Text>
             <Image
               source={images.icon_arrow_right_black}
               style={styles.arrowIcon}
@@ -184,7 +186,7 @@ export const StoreProfileScreen = ({ navigation, route }: any) => {
           </TouchableOpacity>
 
           {/* Store Category */}
-          <Text style={styles.sectionTitle}>Store Category</Text>
+          <Text style={styles.sectionTitle}>{t('store_category')}</Text>
           <TouchableOpacity style={styles.selectionItem} onPress={navigateToCategory}>
             <Text style={styles.selectionText}>{storeCategory}</Text>
             <Image
@@ -195,9 +197,9 @@ export const StoreProfileScreen = ({ navigation, route }: any) => {
           </TouchableOpacity>
 
           {/* Add Store Images */}
-          <Text style={styles.sectionTitle}>Add Store Images</Text>
+          <Text style={styles.sectionTitle}>{t('add_store_images')}</Text>
           <TouchableOpacity style={styles.photoSelector} onPress={handleChoosePhoto}>
-            <Text style={styles.photoText}>Choose a photo</Text>
+            <Text style={styles.photoText}>{t('choose_photo')}</Text>
             <View style={styles.addButton}>
               <Text style={styles.addButtonText}>+</Text>
             </View>
@@ -208,7 +210,7 @@ export const StoreProfileScreen = ({ navigation, route }: any) => {
       {/* Continue Button */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>{t('continue')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

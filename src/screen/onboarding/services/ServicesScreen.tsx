@@ -13,6 +13,7 @@ import { Color } from '../../../themes/theme';
 import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 // Define service interface
 interface Service {
@@ -24,21 +25,22 @@ interface Service {
 export const ServicesScreen = ({ navigation, route }: any) => {
   const { userData, token } = route.params;
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   
   // Initial services list
   const [services, setServices] = useState<Service[]>([
-    { id: '1', name: 'Haircut', isSelected: true },
-    { id: '2', name: 'Beard Trim', isSelected: true },
-    { id: '3', name: 'Hair Colouring', isSelected: true },
-    { id: '4', name: 'Highlights/Balayage', isSelected: true },
-    { id: '5', name: 'Hair Wash & Blow Dry', isSelected: true },
-    { id: '6', name: 'Styling (Curls, Straightening, etc.)', isSelected: true },
-    { id: '7', name: 'Kids\' Haircut', isSelected: true },
-    { id: '8', name: 'Head Shave', isSelected: true },
-    { id: '9', name: 'Scalp Treatment', isSelected: true },
-    { id: '10', name: 'Extensions (Consultation & Application)', isSelected: true },
-    { id: '11', name: 'Bridal Hair/Updo', isSelected: false },
-    { id: '12', name: 'Custom Service (Add Your Own)', isSelected: false },
+    { id: '1', name: t('haircut'), isSelected: true },
+    { id: '2', name: t('beard_trim'), isSelected: true },
+    { id: '3', name: t('hair_colouring'), isSelected: true },
+    { id: '4', name: t('highlights_balayage'), isSelected: true },
+    { id: '5', name: t('hair_wash_blow_dry'), isSelected: true },
+    { id: '6', name: t('styling'), isSelected: true },
+    { id: '7', name: t('kids_haircut'), isSelected: true },
+    { id: '8', name: t('head_shave'), isSelected: true },
+    { id: '9', name: t('scalp_treatment'), isSelected: true },
+    { id: '10', name: t('extensions'), isSelected: true },
+    { id: '11', name: t('bridal_hair'), isSelected: false },
+    { id: '12', name: t('custom_service'), isSelected: false },
   ]);
 
   const goBack = () => {
@@ -100,12 +102,12 @@ export const ServicesScreen = ({ navigation, route }: any) => {
 
       {/* Header */}
       <View style={styles.headerContainer}>
-        <Text style={styles.title}>Select the type of services</Text>
-        <Text style={styles.subtitle}>Add your store's services</Text>
+        <Text style={styles.title}>{t('select_type_of_services')}</Text>
+        <Text style={styles.subtitle}>{t('add_your_store_services')}</Text>
       </View>
 
       {/* Service Selection Instructions */}
-      <Text style={styles.instructions}>Please select a service</Text>
+      <Text style={styles.instructions}>{t('please_select_service')}</Text>
 
       {/* Services List */}
       <FlatList
@@ -122,7 +124,7 @@ export const ServicesScreen = ({ navigation, route }: any) => {
           style={styles.continueButton} 
           onPress={handleContinue}
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>{t('continue')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     settingsIcon: {
-
+       
     },
     section: {
         marginTop: 20,

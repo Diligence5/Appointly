@@ -20,8 +20,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 import { setAccessToken, setUser } from '../../../redux/slices/authSlice';
 import { User } from '../../../interface/UserInterface';
+import { useTranslation } from 'react-i18next';
 
 export const SignupScreen = ({ navigation }: any) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -37,7 +39,7 @@ export const SignupScreen = ({ navigation }: any) => {
 
   const validateName = (name: string) => {
     if (!name) {
-      setNameError('Name is required');
+      setNameError(t('name_required'));
       return false;
     }
     setNameError('');
@@ -47,10 +49,10 @@ export const SignupScreen = ({ navigation }: any) => {
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
-      setEmailError('Email is required');
+      setEmailError(t('email_required'));
       return false;
     } else if (!emailRegex.test(email)) {
-      setEmailError('Please enter a valid email');
+      setEmailError(t('enter_valid_email'));
       return false;
     }
     setEmailError('');
@@ -59,7 +61,7 @@ export const SignupScreen = ({ navigation }: any) => {
 
   const validatePhone = (phone: string) => {
     if (!phone) {
-      setPhoneError('Phone number is required');
+      setPhoneError(t('phone_number_required'));
       return false;
     }
     setPhoneError('');
@@ -68,10 +70,10 @@ export const SignupScreen = ({ navigation }: any) => {
 
   const validatePassword = (password: string) => {
     if (!password) {
-      setPasswordError('Password is required');
+      setPasswordError(t('please_enter_password'));
       return false;
     } else if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
+      setPasswordError(t('password_must_be_at_least_6_characters'));
       return false;
     }
     setPasswordError('');
@@ -137,13 +139,13 @@ export const SignupScreen = ({ navigation }: any) => {
           </TouchableOpacity>
 
           <View style={styles.headerContainer}>
-            <Text style={styles.title}>Create New Account</Text>
-            <Text style={styles.subtitle}>Please create account first before enjoy the features.</Text>
+            <Text style={styles.title}>{t('create_new_account')}</Text>
+            <Text style={styles.subtitle}>{t('please_create_account_first')}</Text>
           </View>
 
           <View style={styles.form}>
             {/* Name Input */}
-            <Text style={styles.label}>Full Name</Text>
+            <Text style={styles.label}>{t('full_name')}</Text>
             <View style={styles.inputWrapper}>
               <Image
                 source={images.icon_person_black}
@@ -152,7 +154,7 @@ export const SignupScreen = ({ navigation }: any) => {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Enter your full name"
+                placeholder={t('enter_full_name')}
                 value={name}
                 onChangeText={setName}
                 onBlur={() => validateName(name)}
@@ -161,7 +163,7 @@ export const SignupScreen = ({ navigation }: any) => {
             {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
 
             {/* Email Input */}
-            <Text style={[styles.label, { marginTop: 20 }]}>Email Address</Text>
+            <Text style={[styles.label, { marginTop: 20 }]}>{t('email_address')}</Text>
             <View style={styles.inputWrapper}>
               <Image
                 source={images.icon_email_black}
@@ -170,7 +172,7 @@ export const SignupScreen = ({ navigation }: any) => {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Enter your email address"
+                placeholder={t('enter_email')}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
@@ -181,7 +183,7 @@ export const SignupScreen = ({ navigation }: any) => {
             {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
             {/* Phone Input */}
-            <Text style={[styles.label, { marginTop: 20 }]}>Phone Number</Text>
+            <Text style={[styles.label, { marginTop: 20 }]}>{t('phone_number')}</Text>
             <View style={styles.inputWrapper}>
               <Image
                 source={images.icon_person_black}
@@ -190,7 +192,7 @@ export const SignupScreen = ({ navigation }: any) => {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Enter your phone number"
+                placeholder={t('enter_phone')}
                 keyboardType="phone-pad"
                 value={phone}
                 onChangeText={setPhone}
@@ -200,7 +202,7 @@ export const SignupScreen = ({ navigation }: any) => {
             {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
 
             {/* Password Input */}
-            <Text style={[styles.label, { marginTop: 20 }]}>Password</Text>
+            <Text style={[styles.label, { marginTop: 20 }]}>{t('password')}</Text>
             <View style={styles.inputWrapper}>
               <Image
                 source={images.icon_lock_black}
@@ -209,7 +211,7 @@ export const SignupScreen = ({ navigation }: any) => {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Enter your password"
+                placeholder={t('enter_password')}
                 secureTextEntry={!passwordVisible}
                 value={password}
                 onChangeText={setPassword}
@@ -235,13 +237,13 @@ export const SignupScreen = ({ navigation }: any) => {
               disabled={isLoading}
             >
               <Text style={styles.signupButtonText}>
-                {isLoading ? 'Creating Account...' : 'Create Account'}
+                {isLoading ? t('creating_account') : t('create_account')}
               </Text>
             </TouchableOpacity>
 
             {/* Social Signup Section */}
             <View style={styles.socialLoginContainer}>
-              <Text style={styles.orText}>Or login using</Text>
+              <Text style={styles.orText}>{t('or_login_using')}</Text>
 
               <TouchableOpacity style={styles.socialButton}>
                 <Image
@@ -249,7 +251,7 @@ export const SignupScreen = ({ navigation }: any) => {
                   style={styles.socialIcon}
                   resizeMode="contain"
                 />
-                <Text style={styles.socialButtonText}>Sign Up using Google</Text>
+                <Text style={styles.socialButtonText}>{t('login_using_google')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.socialButton}>
@@ -258,15 +260,15 @@ export const SignupScreen = ({ navigation }: any) => {
                   style={styles.socialIcon}
                   resizeMode="contain"
                 />
-                <Text style={styles.socialButtonText}>Sign Up using Facebook</Text>
+                <Text style={styles.socialButtonText}>{t('login_using_facebook')}</Text>
               </TouchableOpacity>
             </View>
 
-            {/* Login instead */}
-            <View style={styles.loginInsteadContainer}>
-              <Text style={styles.loginInsteadText}>Already have an account?</Text>
+            {/* Login link */}
+            <View style={styles.loginContainer}>
+              <Text style={styles.loginText}>{t('already_have_account')}</Text>
               <TouchableOpacity onPress={handleLogin}>
-                <Text style={styles.loginLinkText}>Login</Text>
+                <Text style={styles.loginLinkText}>{t('login')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -403,14 +405,14 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.medium,
     color: Color.black,
   },
-  loginInsteadContainer: {
+  loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 16,
     marginBottom: 24,
   },
-  loginInsteadText: {
+  loginText: {
     fontSize: 14,
     fontFamily: FontFamily.regular,
     color: Color.placeholder,

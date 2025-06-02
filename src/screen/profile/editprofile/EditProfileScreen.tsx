@@ -7,124 +7,152 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { Color } from '../../../themes/theme';
 import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../../redux/store';
+import { setUser } from '../../../redux/slices/authSlice';
 import CustomTextInput from '../../../components/CustomTextInput';
 import { useTranslation } from 'react-i18next';
 
 export const EditProfileScreen = ({ navigation }: any) => {
-  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+  const user = useSelector((state: any) => state.auth.user);
 
   // Form state
-  const [name, setName] = useState(user?.name || 'Annie Melfisa');
-  const [email, setEmail] = useState(user?.email || 'anniemelfisa23@gmail.com');
-  const [phone, setPhone] = useState(user?.phone_number || '081227564283');
-  const [password, setPassword] = useState('********');
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleSaveChanges = () => {
-    // Save changes logic would go here
-    // After saving, navigate back
-    navigation.goBack();
-  };
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone_number || '');
+  const [address, setAddress] = useState(user?.address || '');
+  const [city, setCity] = useState(user?.city || '');
+  const [postcode, setPostcode] = useState(user?.postcode || '');
+  const [country, setCountry] = useState(user?.country || '');
 
   const goBack = () => {
     navigation.goBack();
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const handleChoosePhoto = () => {
+    // Implement photo selection logic
+    // This could open an image picker
+  };
+
+  const handleSave = () => {
+    // Update user data
+    const updatedUser = {
+      ...user,
+      name,
+      email,
+      phone_number: phone,
+      address,
+      city,
+      postcode,
+      country,
+    };
+
+    // Dispatch action to update user in Redux store
+    dispatch(setUser(updatedUser));
+
+    // Navigate back
+    navigation.goBack();
   };
 
   return (
     <SafeAreaView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoidingView}
-      >
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={goBack} style={styles.backButton}>
-              <Image
-                source={images.icon_back_press_arrow}
-                style={styles.backIcon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>{t('edit_profile')}</Text>
-            <View style={styles.placeholderView} />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Back Button */}
+        <TouchableOpacity style={styles.backButton} onPress={goBack}>
+          <Image
+            source={images.icon_back_press_arrow}
+            style={styles.backIcon}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
+        {/* Header */}
+        <View style={styles.headerContainer}>
+          <Text style={styles.title}>{t('edit_profile')}</Text>
+          <Text style={styles.subtitle}>{t('update_your_information')}</Text>
+        </View>
+
+        {/* Profile Picture */}
+        <View style={styles.profilePictureContainer}>
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{name.charAt(0) || 'U'}</Text>
+            </View>
           </View>
-
-          {/* Profile Image */}
-          <View style={styles.profileImageContainer}>
-            <Image
-              source={images.icon_profile_place_holder}
-              style={styles.profileImage}
-            />
-          </View>
-
-          {/* Form Fields */}
-          <View style={styles.formContainer}>
-            {/* Name Field */}
-            <CustomTextInput
-              title={t('full_name')}
-              placeholder={t('enter_full_name')}
-              value={name}
-              onChangeText={setName}
-              containerStyle={styles.inputContainerStyle}
-            />
-
-            {/* Email Field */}
-            <CustomTextInput
-              title={t('email_address')}
-              placeholder={t('enter_email')}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              containerStyle={styles.inputContainerStyle}
-            />
-
-            {/* Phone Field */}
-            <CustomTextInput
-              title={t('phone_number')}
-              placeholder={t('enter_phone')}
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              containerStyle={styles.inputContainerStyle}
-            />
-
-            {/* Password Field */}
-            <CustomTextInput
-              title={t('password')}
-              placeholder={t('enter_password')}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              showPassword={true}
-              pressOnPassword={togglePasswordVisibility}
-              containerStyle={styles.inputContainerStyle}
-            />
-          </View>
-        </ScrollView>
-
-        {/* Save Button */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSaveChanges}>
-            <Text style={styles.saveButtonText}>{t('save_changes')}</Text>
+          <TouchableOpacity style={styles.changePhotoButton} onPress={handleChoosePhoto}>
+            <Text style={styles.changePhotoText}>{t('change_photo')}</Text>
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+
+        {/* Form Fields */}
+        <View style={styles.formContainer}>
+          <CustomTextInput
+            title={t('full_name')}
+            value={name}
+            onChangeText={setName}
+            containerStyle={styles.inputContainer}
+          />
+
+          <CustomTextInput
+            title={t('email_address')}
+            value={email}
+            onChangeText={setEmail}
+            containerStyle={styles.inputContainer}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+
+          <CustomTextInput
+            title={t('phone_number')}
+            value={phone}
+            onChangeText={setPhone}
+            containerStyle={styles.inputContainer}
+            keyboardType="phone-pad"
+          />
+
+          <CustomTextInput
+            title={t('address')}
+            value={address}
+            onChangeText={setAddress}
+            containerStyle={styles.inputContainer}
+          />
+
+          <CustomTextInput
+            title={t('city')}
+            value={city}
+            onChangeText={setCity}
+            containerStyle={styles.inputContainer}
+          />
+
+          <CustomTextInput
+            title={t('postcode')}
+            value={postcode}
+            onChangeText={setPostcode}
+            containerStyle={styles.inputContainer}
+          />
+
+          <CustomTextInput
+            title={t('country')}
+            value={country}
+            onChangeText={setCountry}
+            containerStyle={styles.inputContainer}
+          />
+        </View>
+      </ScrollView>
+
+      {/* Save Button */}
+      <View style={styles.bottomContainer}>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>{t('save_changes')}</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
@@ -134,48 +162,71 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Color.white,
   },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 16,
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
   },
   backButton: {
-
+    marginTop: 16,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
   },
   backIcon: {
 
   },
-  headerTitle: {
-    fontSize: 18,
-    fontFamily: FontFamily.medium,
+  headerContainer: {
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontFamily: FontFamily.bold,
     color: Color.black,
+    marginBottom: 4,
   },
-  placeholderView: {
-    width: 36, // Same width as backButton for alignment
+  subtitle: {
+    fontSize: 14,
+    fontFamily: FontFamily.regular,
+    color: Color.placeholder,
   },
-  profileImageContainer: {
+  profilePictureContainer: {
     alignItems: 'center',
-    marginVertical: 24,
+    marginBottom: 24,
   },
-  profileImage: {
+  avatarContainer: {
+    marginBottom: 12,
+  },
+  avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
+    backgroundColor: Color.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    fontSize: 40,
+    fontFamily: FontFamily.bold,
+    color: Color.white,
+  },
+  changePhotoButton: {
+    padding: 8,
+  },
+  changePhotoText: {
+    fontSize: 14,
+    fontFamily: FontFamily.medium,
+    color: Color.primary,
   },
   formContainer: {
-    paddingHorizontal: 20,
+    marginTop: 16,
   },
-  inputContainerStyle: {
-    marginBottom: 12,
+  inputContainer: {
+    marginBottom: 16,
   },
-  buttonContainer: {
-    padding: 20,
-    paddingBottom: 36,
+  bottomContainer: {
+    padding: 24,
+    paddingHorizontal: 24,
   },
   saveButton: {
     backgroundColor: Color.primary,

@@ -20,8 +20,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 import { setAccessToken, setUser } from '../../../redux/slices/authSlice';
 import { User } from '../../../interface/UserInterface';
+import { useTranslation } from 'react-i18next';
 
 export const LoginScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [emailError, setEmailError] = useState('');
@@ -34,10 +36,10 @@ export const LoginScreen = ({ navigation }: any) => {
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!email) {
-            setEmailError('Email is required');
+            setEmailError(t('email_required'));
             return false;
         } else if (!emailRegex.test(email)) {
-            setEmailError('Please enter a valid email');
+            setEmailError(t('enter_valid_email'));
             return false;
         }
         setEmailError('');
@@ -46,10 +48,10 @@ export const LoginScreen = ({ navigation }: any) => {
 
     const validatePassword = (password: string) => {
         if (!password) {
-            setPasswordError('Password is required');
+            setPasswordError(t('please_enter_password'));
             return false;
         } else if (password.length < 6) {
-            setPasswordError('Password must be at least 6 characters');
+            setPasswordError(t('password_must_be_at_least_6_characters'));
             return false;
         }
         setPasswordError('');
@@ -117,13 +119,13 @@ export const LoginScreen = ({ navigation }: any) => {
                     </TouchableOpacity>
 
                     <View style={styles.headerContainer}>
-                        <Text style={styles.title}>Login to Your Account</Text>
-                        <Text style={styles.subtitle}>Please log in to access your Shiny account.</Text>
+                        <Text style={styles.title}>{t('login_to_your_account')}</Text>
+                        <Text style={styles.subtitle}>{t('please_log_in_to_access_your_account')}</Text>
                     </View>
 
                     <View style={styles.form}>
                         {/* Email/Phone Input */}
-                        <Text style={styles.label}>Email Address or Phone Number</Text>
+                        <Text style={styles.label}>{t('email_address_or_phone_number')}</Text>
                         <View style={styles.inputWrapper}>
                             <Image
                                 source={images.icon_email_black}
@@ -132,7 +134,7 @@ export const LoginScreen = ({ navigation }: any) => {
                             />
                             <TextInput
                                 style={styles.input}
-                                placeholder="Enter your email or phone number"
+                                placeholder={t('enter_your_email_or_phone_number')}
                                 keyboardType="email-address"
                                 autoCapitalize="none"
                                 value={email}
@@ -143,7 +145,7 @@ export const LoginScreen = ({ navigation }: any) => {
                         {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
                         {/* Password Input */}
-                        <Text style={[styles.label, { marginTop: 20 }]}>Password</Text>
+                        <Text style={[styles.label, { marginTop: 20 }]}>{t('password')}</Text>
                         <View style={styles.inputWrapper}>
                             <Image
                                 source={images.icon_lock_black}
@@ -152,7 +154,7 @@ export const LoginScreen = ({ navigation }: any) => {
                             />
                             <TextInput
                                 style={styles.input}
-                                placeholder="Enter your password"
+                                placeholder={t('enter_password')}
                                 secureTextEntry={!passwordVisible}
                                 value={password}
                                 onChangeText={setPassword}
@@ -176,7 +178,7 @@ export const LoginScreen = ({ navigation }: any) => {
                             onPress={handleForgotPassword}
                             style={styles.forgotPasswordContainer}
                         >
-                            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                            <Text style={styles.forgotPasswordText}>{t('forgot_password')}?</Text>
                         </TouchableOpacity>
 
                         {/* Login Button */}
@@ -186,13 +188,13 @@ export const LoginScreen = ({ navigation }: any) => {
                             disabled={isLoading}
                         >
                             <Text style={styles.loginButtonText}>
-                                {isLoading ? 'Logging in...' : 'Login'}
+                                {isLoading ? t('logging_in') : t('login')}
                             </Text>
                         </TouchableOpacity>
 
                         {/* Social Login Section */}
                         <View style={styles.socialLoginContainer}>
-                            <Text style={styles.orText}>Or login using</Text>
+                            <Text style={styles.orText}>{t('or_login_using')}</Text>
 
                             <TouchableOpacity style={styles.socialButton}>
                                 <Image
@@ -200,7 +202,7 @@ export const LoginScreen = ({ navigation }: any) => {
                                     style={styles.socialIcon}
                                     resizeMode="contain"
                                 />
-                                <Text style={styles.socialButtonText}>Login using Google</Text>
+                                <Text style={styles.socialButtonText}>{t('login_using_google')}</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.socialButton}>
@@ -209,15 +211,15 @@ export const LoginScreen = ({ navigation }: any) => {
                                     style={styles.socialIcon}
                                     resizeMode="contain"
                                 />
-                                <Text style={styles.socialButtonText}>Login using Facebook</Text>
+                                <Text style={styles.socialButtonText}>{t('login_using_facebook')}</Text>
                             </TouchableOpacity>
                         </View>
 
                         {/* Signup link */}
                         <View style={styles.signupContainer}>
-                            <Text style={styles.signupText}>Don't have an account?</Text>
+                            <Text style={styles.signupText}>{t('dont_have_an_account')}</Text>
                             <TouchableOpacity onPress={handleSignup}>
-                                <Text style={styles.signupLinkText}>Create Account</Text>
+                                <Text style={styles.signupLinkText}>{t('create_account')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

@@ -6,88 +6,59 @@ import {
     SafeAreaView,
     TouchableOpacity,
     Image,
-    ScrollView,
     FlatList,
-    Dimensions,
-    Linking,
-    StatusBar,
 } from 'react-native';
 import { Color } from '../../../themes/theme';
 import { FontFamily } from '../../../constants/FontFamily';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
-// Types for staff and services
-interface StaffMember {
+// Define store/service interface
+interface Store {
     id: string;
     name: string;
-    specialty: string;
-    price: string;
+    type: string;
+    address: string;
     image: any;
-}
-
-interface Service {
-    id: string;
-    name: string;
-    price: string;
-    image: any;
+    rating: number;
+    isActive: boolean;
 }
 
 export const StoreListingScreen = ({ navigation }: any) => {
-    const { t } = useTranslation();
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
+    const user = useSelector((state: any) => state.auth.user);
 
-    // Sample staff data
-    const staffMembers: StaffMember[] = [
+    // Sample store data - in a real app, this would come from the API
+    const stores: Store[] = [
         {
             id: '1',
-            name: 'Darrell Steward',
-            specialty: 'Haircut Expert',
-            price: '£25.00',
-            image: images.icon_profile_place_holder, // Replace with actual staff image
+            name: 'Barber Street',
+            type: 'Barbershop',
+            address: '123 High Street, London',
+            image: images.icon_profile_place_holder,
+            rating: 4.8,
+            isActive: true,
         },
         {
             id: '2',
-            name: 'Jacob Jones',
-            specialty: 'Beard Specialist',
-            price: '£20.00',
-            image: images.icon_profile_place_holder, // Replace with actual staff image
+            name: 'Style Studio',
+            type: 'Hair Salon',
+            address: '45 Fashion Avenue, London',
+            image: images.icon_profile_place_holder,
+            rating: 4.5,
+            isActive: true,
         },
         {
             id: '3',
-            name: 'Brooklyn Simmons',
-            specialty: 'Haircut Expert',
-            price: '£25.00',
-            image: images.icon_profile_place_holder, // Replace with actual staff image
-        },
-    ];
-
-    // Sample services data
-    const services: Service[] = [
-        {
-            id: '1',
-            name: 'Haircut & Shave',
-            price: '£25.00',
-            image: images.icon_profile_place_holder, // Replace with actual service image
-        },
-        {
-            id: '2',
-            name: 'Haircut & Facial',
-            price: '£40.00',
-            image: images.icon_profile_place_holder, // Replace with actual service image
-        },
-        {
-            id: '3',
-            name: 'Haircut & Beard Grooming',
-            price: '£30.00',
-            image: images.icon_profile_place_holder, // Replace with actual service image
-        },
-        {
-            id: '4',
-            name: 'Haircut & Anti-Pollution Cleanup',
-            price: '£50.00',
-            image: images.icon_profile_place_holder, // Replace with actual service image
+            name: 'Beauty Lounge',
+            type: 'Beauty Salon',
+            address: '78 Beauty Boulevard, London',
+            image: images.icon_profile_place_holder,
+            rating: 4.7,
+            isActive: false,
         },
     ];
 
@@ -95,194 +66,88 @@ export const StoreListingScreen = ({ navigation }: any) => {
         navigation.goBack();
     };
 
-    const openWebsite = () => {
-        Linking.openURL('https://famousbarbershop.com');
+    const handleAddStore = () => {
+        // Navigate to add store screen
+        navigation.navigate('StoreDetails');
     };
 
-    const makeCall = () => {
-        Linking.openURL('tel:+1234567890');
+    const handleEditStore = (store: Store) => {
+        // Navigate to edit store screen
+        navigation.navigate('StoreProfile', { storeData: store });
     };
 
-    const getDirections = () => {
-        Linking.openURL('https://maps.google.com/?q=123+Main+St,+Albuquerque,+New+Mexico');
-    };
+    const renderStoreItem = ({ item }: { item: Store }) => (
+        <TouchableOpacity
+            style={styles.storeItem}
+            onPress={() => handleEditStore(item)}
+        >
+            {/* Store Image */}
+            <Image
+                source={item.image}
+                style={styles.storeImage}
+                resizeMode="cover"
+            />
 
-    const sendMessage = () => {
-        // Navigate to message screen or open messaging app
-        navigation.navigate('Messages');
-    };
-
-    const bookStaff = (staffId: string) => {
-        // Handle staff booking
-        console.log(`Booking staff member with ID: ${staffId}`);
-    };
-
-    const bookService = (serviceId: string) => {
-        // Handle service booking
-        console.log(`Booking service with ID: ${serviceId}`);
-    };
-
-    const renderStaffItem = ({ item }: { item: StaffMember }) => (
-        <View style={styles.staffItem}>
-            <View style={styles.staffInfoContainer}>
-                <Image source={item.image} style={styles.staffImage} />
-                <View style={styles.staffInfo}>
-                    <Text style={styles.staffName}>{item.name}</Text>
-                    <Text style={styles.staffSpecialty}>{item.specialty}</Text>
-                    <Text style={styles.staffPrice}>{item.price}</Text>
+            {/* Store Info */}
+            <View style={styles.storeInfo}>
+                <View style={styles.storeHeader}>
+                    <Text style={styles.storeName}>{item.name}</Text>
+                    <View style={[
+                        styles.statusIndicator,
+                        { backgroundColor: item.isActive ? '#4CAF50' : '#9E9E9E' }
+                    ]} />
+                </View>
+                <Text style={styles.storeType}>{item.type}</Text>
+                <Text style={styles.storeAddress}>{item.address}</Text>
+                
+                {/* Rating */}
+                <View style={styles.ratingContainer}>
+                    <Image
+                        source={images.icon_card_black}
+                        style={styles.starIcon}
+                        resizeMode="contain"
+                    />
+                    <Text style={styles.ratingText}>{item.rating.toFixed(1)}</Text>
                 </View>
             </View>
-            <TouchableOpacity
-                style={styles.bookButton}
-                onPress={() => bookStaff(item.id)}
-            >
-                <Text style={styles.bookButtonText}>{t('book')}</Text>
-                <Text style={styles.bookButtonPlus}>+</Text>
-            </TouchableOpacity>
-        </View>
-    );
 
-    const renderServiceItem = ({ item }: { item: Service }) => (
-        <View style={styles.serviceItem}>
-            <View style={styles.serviceInfoContainer}>
-                <Image source={item.image} style={styles.serviceImage} />
-                <View style={styles.serviceInfo}>
-                    <Text style={styles.serviceName}>{item.name}</Text>
-                    <Text style={styles.servicePrice}>{item.price}</Text>
-                </View>
-            </View>
-            <TouchableOpacity
-                style={styles.bookButton}
-                onPress={() => bookService(item.id)}
-            >
-                <Text style={styles.bookButtonText}>{t('book')}</Text>
-                <Text style={styles.bookButtonPlus}>+</Text>
-            </TouchableOpacity>
-        </View>
+            {/* Arrow Icon */}
+            <Image
+                source={images.icon_arrow_right_black}
+                style={styles.arrowIcon}
+                resizeMode="contain"
+            />
+        </TouchableOpacity>
     );
 
     return (
         <SafeAreaView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-            <StatusBar barStyle="dark-content" />
-            <ScrollView showsVerticalScrollIndicator={false}>
-                {/* Shop Image */}
-                <View style={styles.shopImageContainer}>
+            {/* Header */}
+            <View style={styles.header}>
+                <TouchableOpacity style={styles.backButton} onPress={goBack}>
                     <Image
-                        source={images.icon_sorting_listing_image} // Replace with actual shop image
-                        style={styles.shopImage}
-                        resizeMode="cover"
+                        source={images.icon_back_press_arrow}
+                        style={styles.backIcon}
+                        resizeMode="contain"
                     />
-                    <TouchableOpacity style={styles.backButton} onPress={goBack}>
-                        <Image
-                            source={images.icon_back_press_arrow}
-                            style={styles.backIcon}
-                            resizeMode="contain"
-                        />
-                    </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>{t('your_stores')}</Text>
+                <View style={styles.placeholderView} />
+            </View>
 
-                {/* Shop Details Card */}
-                <View style={styles.shopDetailsCard}>
-                    <View style={styles.line} />
-                    <Text style={styles.shopName}>Famous Barbershop</Text>
-                    <Text style={styles.shopAddress}>
-                        123 Main St, Albuquerque, New Mexico 87104
-                    </Text>
+            {/* Store List */}
+            <FlatList
+                data={stores}
+                renderItem={renderStoreItem}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.listContainer}
+                showsVerticalScrollIndicator={false}
+            />
 
-                    <View style={styles.shopStatusRow}>
-                        <View style={styles.openStatusContainer}>
-                            <Image source={images.icon_clock_green} resizeMode="contain" />
-                            <Text style={styles.openStatusText}>{t('now_open')}</Text>
-                        </View>
-                        <View style={styles.ratingContainer}>
-                            <Image
-                                source={images.icon_star_yellow} // Using an available icon
-                                style={styles.starIcon}
-                            />
-                            <Text style={styles.ratingText}>4.8 (236)</Text>
-                        </View>
-                    </View>
-
-                    {/* Action Buttons */}
-                    <View style={styles.actionButtonsContainer}>
-                        <TouchableOpacity style={styles.actionButton} onPress={openWebsite}>
-                            <View style={styles.actionIconContainer}>
-                                <Image
-                                    source={images.icon_global_black}
-                                    style={styles.actionIcon}
-                                    resizeMode="contain"
-                                />
-                            </View>
-                            <Text style={styles.actionText}>{t('website')}</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.actionButton} onPress={makeCall}>
-                            <View style={styles.actionIconContainer}>
-                                <Image
-                                    source={images.icon_call_black} // Replace with call icon
-                                    style={styles.actionIcon}
-                                    resizeMode="contain"
-                                />
-                            </View>
-                            <Text style={styles.actionText}>{t('call')}</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.actionButton} onPress={getDirections}>
-                            <View style={styles.actionIconContainer}>
-                                <Image
-                                    source={images.icon_map_black} // Replace with directions icon
-                                    style={styles.actionIcon}
-                                    resizeMode="contain"
-                                />
-                            </View>
-                            <Text style={styles.actionText}>{t('direction')}</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.actionButton} onPress={sendMessage}>
-                            <View style={styles.actionIconContainer}>
-                                <Image
-                                    source={images.icon_message_unselected} // Replace with message icon
-                                    style={styles.actionIcon}
-                                    resizeMode="contain"
-                                />
-                            </View>
-                            <Text style={styles.actionText}>{t('message')}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={styles.horizontalLine} />
-                {/* Staff Section */}
-                <View style={styles.sectionContainer}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>{t('staff')}</Text>
-                        <TouchableOpacity>
-                            <Text style={styles.viewAllText}>{t('view_all')}</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <FlatList
-                        data={staffMembers}
-                        renderItem={renderStaffItem}
-                        keyExtractor={item => item.id}
-                        scrollEnabled={false}
-                    />
-                </View>
-
-                {/* Services Section */}
-                <View style={[styles.sectionContainer, { marginBottom: 30 }]}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>{t('services')}</Text>
-                        <TouchableOpacity>
-                            <Text style={styles.viewAllText}>{t('view_all')}</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <FlatList
-                        data={services}
-                        renderItem={renderServiceItem}
-                        keyExtractor={item => item.id}
-                        scrollEnabled={false}
-                    />
-                </View>
-            </ScrollView>
+            {/* Add Store Button */}
+            <TouchableOpacity style={styles.addButton} onPress={handleAddStore}>
+                <Text style={styles.addButtonText}>{t('add_new_store')}</Text>
+            </TouchableOpacity>
         </SafeAreaView>
     );
 };
@@ -292,230 +157,117 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: Color.white,
     },
-    shopImageContainer: {
-        width: '100%',
-        height: 200,
-        position: 'relative',
-    },
-    shopImage: {
-        width: '100%',
-        height: '100%',
-
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 16,
     },
     backButton: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        width: 44,
+        height: 44,
         justifyContent: 'center',
-        alignItems: 'center',
     },
     backIcon: {
 
     },
-    shopDetailsCard: {
-        marginTop: -20,
-        padding: 16,
+    headerTitle: {
+        fontSize: 18,
+        fontFamily: FontFamily.bold,
+        color: Color.black,
+    },
+    placeholderView: {
+        width: 44,
+    },
+    listContainer: {
+        paddingHorizontal: 20,
+        paddingBottom: 100, // Space for the add button
+    },
+    storeItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: Color.white,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 16,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 4,
+        elevation: 2,
     },
-    line: {
-        height: 4,
-        backgroundColor: Color.border,
-        marginBottom: 8,
-        width: '35%',
-        alignSelf: 'center',
+    storeImage: {
+        width: 70,
+        height: 70,
+        borderRadius: 8,
+        marginRight: 16,
     },
-    shopName: {
-        fontSize: 18,
-        fontFamily: FontFamily.bold,
-        color: Color.black,
+    storeInfo: {
+        flex: 1,
+    },
+    storeHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginBottom: 4,
     },
-    shopAddress: {
+    storeName: {
+        fontSize: 16,
+        fontFamily: FontFamily.bold,
+        color: Color.black,
+    },
+    statusIndicator: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+    },
+    storeType: {
+        fontSize: 14,
+        fontFamily: FontFamily.medium,
+        color: Color.primary,
+        marginBottom: 4,
+    },
+    storeAddress: {
         fontSize: 14,
         fontFamily: FontFamily.regular,
         color: Color.placeholder,
         marginBottom: 8,
-    },
-    shopStatusRow: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    openStatusContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        marginRight: 24,
-    },
-
-    openStatusText: {
-        fontSize: 12,
-        fontFamily: FontFamily.regular,
-        color: Color.black,
     },
     ratingContainer: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     starIcon: {
+        width: 16,
+        height: 16,
+        tintColor: '#FFC107',
         marginRight: 4,
-        tintColor: Color.yellow,
     },
     ratingText: {
-        fontSize: 12,
+        fontSize: 14,
         fontFamily: FontFamily.medium,
         color: Color.black,
     },
-    actionButtonsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 8,
+    arrowIcon: {
+        width: 16,
+        height: 16,
+        tintColor: '#AAAAAA',
     },
-    actionButton: {
-        alignItems: 'center',
-    },
-    actionIconContainer: {
+    addButton: {
+        position: 'absolute',
+        bottom: 24,
+        left: 24,
+        right: 24,
+        backgroundColor: Color.primary,
+        height: 56,
+        borderRadius: 28,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 4,
     },
-    actionIcon: {
-
-    },
-    actionText: {
-        fontSize: 12,
-        fontFamily: FontFamily.regular,
-        color: Color.black,
-    },
-    horizontalLine: {
-        height: 8,
-        backgroundColor: Color.border,
-        marginTop: 16,
-    },
-    sectionContainer: {
-        marginTop: 24,
-        paddingHorizontal: 16,
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontFamily: FontFamily.bold,
-        color: Color.black,
-    },
-    viewAllText: {
-        fontSize: 12,
-        fontFamily: FontFamily.medium,
-        color: Color.primary,
-    },
-    staffItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderColor: Color.border,
-        borderWidth: 1,
-        padding: 16,
-        marginBottom: 16,
-        borderRadius: 16,
-    },
-    staffInfoContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
-    staffImage: {
-        width: 68,
-        height: 68,
-        borderRadius: 5,
-        marginRight: 12,
-    },
-    staffInfo: {
-        flex: 1,
-    },
-    staffName: {
+    addButtonText: {
         fontSize: 16,
-        fontFamily: FontFamily.medium,
-        color: Color.black,
-    },
-    staffSpecialty: {
-        fontSize: 12,
-        fontFamily: FontFamily.regular,
-        color: Color.placeholder,
-    },
-    staffPrice: {
-        fontSize: 14,
-        fontFamily: FontFamily.medium,
-        color: Color.black,
-        marginTop: 2,
-    },
-    bookButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderWidth: 1,
-        borderColor: Color.primary,
-        borderRadius: 54,
-    },
-    bookButtonText: {
-        fontSize: 14,
-        fontFamily: FontFamily.medium,
-        color: Color.black,
-        marginRight: 4,
-    },
-    bookButtonPlus: {
-        fontSize: 14,
         fontFamily: FontFamily.bold,
-        color: Color.black,
-    },
-    serviceItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-        borderColor: Color.border,
-        borderWidth: 1,
-        padding: 16,
-        borderRadius: 16,
-    },
-    serviceInfoContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
-    serviceImage: {
-        width: 68,
-        height: 68,
-        borderRadius: 5,
-        marginRight: 12,
-    },
-    serviceInfo: {
-        flex: 1,
-    },
-    serviceName: {
-        fontSize: 16,
-        fontFamily: FontFamily.medium,
-        color: Color.black,
-    },
-    servicePrice: {
-        fontSize: 14,
-        fontFamily: FontFamily.medium,
-        color: Color.black,
-        marginTop: 2,
+        color: Color.white,
     },
 }); 

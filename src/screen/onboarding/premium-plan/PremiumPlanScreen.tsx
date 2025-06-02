@@ -17,6 +17,7 @@ import { setAccessToken, setUser } from '../../../redux/slices/authSlice';
 import { User } from '../../../interface/UserInterface';
 import images from '../../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 const PLAN_CARD_WIDTH = width * 0.7;
@@ -35,43 +36,44 @@ export const PremiumPlanScreen = ({ navigation, route }: any) => {
     const { userData, token } = route.params || {};
     const dispatch = useDispatch();
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
     const [selectedPlanId, setSelectedPlanId] = useState('2'); // Default to middle (premium) plan
     
     // Sample membership plans data
     const membershipPlans: MembershipPlan[] = [
         {
             id: '1',
-            title: 'Basic',
+            title: t('basic'),
             price: '£4.99',
             isPopular: false,
             features: [
-                'Basic bookings (3/month)',
-                'Standard profile visibility',
-                'With ads'
+                t('basic_bookings'),
+                t('standard_profile_visibility'),
+                t('with_ads')
             ]
         },
         {
             id: '2',
-            title: 'Premium',
+            title: t('premium'),
             price: '£9.99',
             isPopular: true,
             features: [
-                'Unlimited bookings',
-                'Enhanced profile visibility',
-                'Free from ads'
+                t('unlimited_bookings'),
+                t('enhanced_profile_visibility'),
+                t('free_from_ads')
             ]
         },
         {
             id: '3',
-            title: 'Pro',
+            title: t('pro'),
             price: '£19.99',
             isPopular: false,
             features: [
-                'Unlimited bookings',
-                'Priority profile visibility',
-                'Free from ads',
-                'Premium support',
-                'Analytics dashboard'
+                t('unlimited_bookings'),
+                t('priority_profile_visibility'),
+                t('free_from_ads'),
+                t('premium_support'),
+                t('analytics_dashboard')
             ]
         }
     ];
@@ -120,7 +122,7 @@ export const PremiumPlanScreen = ({ navigation, route }: any) => {
             >
                 {item.isPopular && (
                     <View style={styles.popularBadge}>
-                        <Text style={styles.popularText}>Most Popular</Text>
+                        <Text style={styles.popularText}>{t('most_popular')}</Text>
                     </View>
                 )}
                 
@@ -159,9 +161,9 @@ export const PremiumPlanScreen = ({ navigation, route }: any) => {
 
                 {/* Header */}
                 <View style={styles.headerContainer}>
-                    <Text style={styles.title}>Upgrade and Get 50% off</Text>
-                    <Text style={styles.subtitle}>Premium for New Users</Text>
-                    <Text style={styles.description}>A better frame-work of commercial focus.</Text>
+                    <Text style={styles.title}>{t('upgrade_get_discount')}</Text>
+                    <Text style={styles.subtitle}>{t('premium_for_new_users')}</Text>
+                    <Text style={styles.description}>{t('better_commercial_framework')}</Text>
                 </View>
 
                 {/* Horizontal Plan Selector */}
@@ -210,15 +212,15 @@ export const PremiumPlanScreen = ({ navigation, route }: any) => {
                     style={styles.startButton}
                     onPress={handleStartFreeTrial}
                 >
-                    <Text style={styles.startButtonText}>Start Free Trial</Text>
+                    <Text style={styles.startButtonText}>{t('start_free_trial')}</Text>
                 </TouchableOpacity>
 
                 {/* No commitments text */}
-                <Text style={styles.noCommitmentText}>No commitments. Cancel anytime</Text>
+                <Text style={styles.noCommitmentText}>{t('no_commitments_cancel_anytime')}</Text>
 
                 {/* Skip Option */}
                 <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
-                    <Text style={styles.skipText}>Skip for now</Text>
+                    <Text style={styles.skipText}>{t('skip_for_now')}</Text>
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
