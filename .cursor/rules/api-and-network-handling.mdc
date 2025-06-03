@@ -1,0 +1,912 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+// React Native API and Network Handling .cursorrules
+
+// ====== AXIOS INSTANCE CONFIGURATION ======
+
+const axiosInstancePattern = `
+// src/api/config/axiosInstance.ts
+import axios from 'axios';
+import {API_BASE_URL} from './apiConfig';
+import {APIConstants} from './apiConstants';
+import {store} from '../../redux/store';
+import {clearAccessToken} from '../../redux/slices/authSlice';
+
+// Create Axios instance
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    Accept: APIConstants.ContentType.JSON,
+  },
+});
+
+// Request Interceptor to dynamically set Content-Type
+axiosInstance.interceptors.request.use(
+  config => {
+    const token = store.getState().auth.accessToken;
+
+    // Add Authorization token if needed
+    if (token) {
+      config.headers.Authorization = \`\${APIConstants.AuthenticationType.BEARER} \${token}\`;
+    }
+
+    // Dynamically set Content-Type based on the request type
+    if (config.data instanceof FormData) {
+      config.headers['Content-Type'] = APIConstants.ContentType.MULTI_PART; // For file uploads
+    } else {
+      config.headers['Content-Type'] = APIConstants.ContentType.JSON; // For JSON requests
+    }
+
+    return config;
+  },
+  error => Promise.reject(error),
+);
+
+// Response Interceptor
+axiosInstance.interceptors.response.use(
+  response => response,
+  error => {
+    // Handle API errors globally
+    if (error?.response?.status === APIConstants.StatusCode.UNAUTHENTICATED) {
+      store.dispatch(clearAccessToken());
+    }
+    console.error('API Error:', error.response || error.message);
+    return Promise.reject(error);
+  },
+);
+
+export default axiosInstance;
+`;
+
+// ====== API CONSTANTS PATTERN ======
+
+const apiConstantsPattern = `
+// src/api/config/apiConstants.ts
+export const APIConstants = {
+  AuthenticationType: {
+    BASIC: 'Basic',
+    BEARER: 'Bearer',
+    TOKEN: 'Token',
+  },
+  ContentType: {
+    JSON: 'application/json',
+    MULTI_PART: 'multipart/form-data',
+    URLEncoded: 'application/x-www-form-urlencoded',
+  },
+  HTTPMethod: {
+    GET: 'GET',
+    DELETE: 'DELETE',
+    POST: 'POST',
+    PUT: 'PUT',
+  },
+  StatusCode: {
+    SUCCESS: 200,
+    CREATED: 201,
+    REDIRECTION: 300,
+    CLIENT_ERROR: 400,
+    UNAUTHENTICATED: 401,
+    FORBIDDEN: 403,
+    SERVER_ERROR: 500,
+  },
+};
+`;
+
+// ====== API CONFIG PATTERN ======
+
+const apiConfigPattern = `
+// src/api/config/apiConfig.ts
+export const API_BASE_URL = \`https://api.example.com/v1/\`;
+
+// Optional external service URLs
+export const PRIVACY_POLICY_URL = \`privacy-policy\`;
+export const TERMS_AND_CONDITION_URL = \`terms-condition\`;
+export const ABOUT_US_URL = \`about-us\`;
+
+// Third-party API configurations
+export const PUSHER_APP_ID = 'your_pusher_app_id';
+export const PUSHER_APP_KEY = 'your_pusher_app_key';
+export const PUSHER_APP_SECRET = 'your_pusher_app_secret';
+export const PUSHER_APP_CLUSTER = 'ap2';
+`;
+
+// ====== API ENDPOINTS PATTERN ======
+
+const apiEndpointsPattern = `
+// src/api/config/endpoints.ts
+export const API_ENDPOINTS = {
+  // Auth endpoints
+  LOGIN: \`login\`,
+  VERIFY_OTP: \`verify-otp\`,
+  RESEND_OTP: \`resend-otp\`,
+  ME: \`me\`,
+  LOGOUT: \`logout\`,
+  
+  // Dynamic endpoints with parameters
+  UPDATE_MEMBER: (id: number) => \`update-member/\${id}\`,
+  DELETE_MEMBER: (id: number) => \`delete-member/\${id}\`,
+  GET_REASON_LIST: (type: string) => \`get-reason-list/\${type}\`,
+  
+  // Static endpoints
+  GET_ORDER_LIST: \`get-order-list\`,
+  UPDATE_ORDER_STATUS: \`update-order-status\`,
+  GET_ORDER_STATUS_COUNT: \`get-order-status-count\`,
+  GET_FEEDBACK_LIST: \`get-feedback-list\`,
+  NOTIFICATIONS: \`notifications\`,
+  NOTIFICATION_COUNT: \`notification/count\`,
+};
+`;
+
+// ====== API METHODS PATTERN ======
+
+const apiMethodsPattern = `
+// src/api/utils/apiMethods.ts
+import axiosInstance from '../config/axiosInstance';
+import NetInfo from '@react-native-community/netinfo';
+
+const checkInternetConnection = async (): Promise<boolean> => {
+  const state = await NetInfo.fetch();
+  return state.isConnected ?? false;
+};
+
+const handleApiCall = async (
+  method: string,
+  url: string,
+  data?: object,
+  params?: object,
+  token?: string,
+  extraHeaders?: object,
+) => {
+  const isConnected = await checkInternetConnection();
+  if (!isConnected) {
+    throw new Error('No internet connection');
+  }
+
+  try {
+    // Merge token and extra headers
+    const headers = {
+      ...(token ? {Authorization: \`Bearer \${token}\`} : {}),
+      ...(extraHeaders ?? {}), // Add any additional headers
+    };
+
+    let response;
+    switch (method) {
+      case 'get':
+        response = await axiosInstance.get(url, {params, headers});
+        break;
+      case 'post':
+        response = await axiosInstance.post(url, data, {headers});
+        break;
+      case 'put':
+        response = await axiosInstance.put(url, data, {headers});
+        break;
+      case 'delete':
+        response = await axiosInstance.delete(url, {headers});
+        break;
+      default:
+        throw new Error('Invalid HTTP method');
+    }
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get = async (
+  url: string,
+  params?: object,
+  token?: string,
+  extraHeaders?: object,
+) => {
+  return handleApiCall('get', url, undefined, params, token, extraHeaders);
+};
+
+export const post = async (
+  url: string,
+  data?: object,
+  token?: string,
+  extraHeaders?: object,
+) => {
+  return handleApiCall('post', url, data, undefined, token, extraHeaders);
+};
+
+export const put = async (
+  url: string,
+  data?: object,
+  token?: string,
+  extraHeaders?: object,
+) => {
+  return handleApiCall('put', url, data, undefined, token, extraHeaders);
+};
+
+export const del = async (
+  url: string,
+  token?: string,
+  extraHeaders?: object,
+) => {
+  return handleApiCall(
+    'delete',
+    url,
+    undefined,
+    undefined,
+    token,
+    extraHeaders,
+  );
+};
+`;
+
+// ====== API SERVICE PATTERN ======
+
+const apiServicePattern = `
+// src/api/services/userService.ts
+import {API_ENDPOINTS} from '../config/endpoints';
+import {del, get, post, put} from '../utils/apiMethods';
+import {OffsetInterface, UpdateOrderStatus} from '../../interface/RequestInterface';
+
+/**
+ * Fetches list of members with pagination
+ * @param params Pagination and filtering parameters
+ * @returns Promise with member list data
+ */
+export const getMemberList = (params: OffsetInterface) => {
+  return get(API_ENDPOINTS.GET_MEMBER_LIST, params);
+};
+
+/**
+ * Add a new member
+ * @param data Member data to add
+ * @returns Promise with response
+ */
+export const addMember = (data: object) => {
+  return post(API_ENDPOINTS.ADD_MEMBER, data);
+};
+
+/**
+ * Update existing member
+ * @param data Updated member data
+ * @param id Member ID
+ * @returns Promise with response
+ */
+export const updateMember = (data: object, id: number) => {
+  return put(API_ENDPOINTS.UPDATE_MEMBER(id), data);
+};
+
+/**
+ * Delete a member
+ * @param id Member ID to delete
+ * @returns Promise with response
+ */
+export const deleteMember = (id: number) => {
+  return del(API_ENDPOINTS.DELETE_MEMBER(id));
+};
+`;
+
+// ====== REQUEST INTERFACE PATTERN ======
+
+const requestInterfacePattern = `
+// src/interface/RequestInterface.ts
+export interface OffsetInterface {
+  offset: number;
+  keyword?: string;
+}
+
+export interface UpdateOrderStatus {
+  order_id?: number;
+  status?: string;
+  otp?: string;
+  shop_working_time_id?: number;
+}
+
+export interface BusinessRequest {
+  type: string;
+  to_date: string;
+  from_date: string;
+}
+`;
+
+// ====== RESPONSE INTERFACE PATTERN ======
+
+const responseInterfacePattern = `
+// src/interface/ResponseInterface.ts
+export interface OrderDetails {
+  id: number;
+  uuid: string;
+  status: string;
+  items: OrderItem[];
+  customer: Customer;
+  created_at: string;
+  total_amount: number;
+  payment_method: string;
+}
+
+export interface OrderItem {
+  id: number;
+  name: string;
+  quantity: number;
+  price: number;
+  total: number;
+  status: string;
+  addons: IAddon[];
+  extras: IExtra[];
+}
+
+export interface IOrderStatusCounts {
+  pending_count: number;
+  accepted_count: number;
+  rejected_count: number;
+  completed_count: number;
+  cancelled_count: number;
+  out_for_delivery_count: number;
+  ready_for_pickup_count: number;
+  resheduled_count: number;
+}
+`;
+
+// ====== API ERROR HANDLING PATTERN ======
+
+const apiErrorHandlingPattern = `
+// Component-level error handling
+const handleError = (error: unknown, context: string) => {
+  if (error instanceof AxiosError) {
+    setSnackBarMessage(error.response?.data?.message || error.message);
+  } else if (error instanceof Error) {
+    if (error.message === 'No internet connection') {
+      setSnackBarMessage(error.message);
+      setIsInternet(false);
+    }
+    console.error(\`\${context} Failed:\`, error.message);
+  } else {
+    console.error(\`\${context} Failed: Unknown error\`, error);
+  }
+  setSuccessColor(Color.red);
+  setSnackBarVisible(true);
+};
+
+// Try-catch pattern for API calls
+const apiCallTemplate = async () => {
+  try {
+    setLoading(true);
+    const response = await someApiCall(params);
+    setData(response.data);
+    setSuccessColor(Color.green);
+    setSnackBarMessage("Operation completed successfully");
+  } catch (error) {
+    handleError(error, "API Call");
+  } finally {
+    setLoading(false);
+    setSnackBarVisible(true);
+  }
+};
+`;
+
+// ====== NETWORK STATUS MONITORING PATTERN ======
+
+const networkMonitoringPattern = `
+// src/components/NetworkStatusMonitor.tsx
+import React, {useEffect, useState} from 'react';
+import {View, Text, StyleSheet} from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+import {Color} from '../theme/theme';
+
+const NetworkStatusMonitor: React.FC = () => {
+  const [isConnected, setIsConnected] = useState<boolean | null>(true);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  if (isConnected === true) {
+    return null;
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>No Internet Connection</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: Color.red,
+    padding: 5,
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  text: {
+    color: Color.white,
+    fontWeight: 'bold',
+  },
+});
+
+export default NetworkStatusMonitor;
+`;
+
+// ====== FIREBASE MESSAGING PATTERN ======
+
+const firebaseMessagingPattern = `
+// src/services/firebase.ts
+import {Platform, PermissionsAndroid} from 'react-native';
+import {
+  getMessaging,
+  AuthorizationStatus,
+} from '@react-native-firebase/messaging';
+import {getApp} from '@react-native-firebase/app';
+import notifee, {
+  AndroidImportance,
+  AndroidVisibility,
+} from '@notifee/react-native';
+
+export const requestUserPermissionAndGetToken = async (): Promise<
+  string | null
+> => {
+  const app = getApp();
+  const messaging = getMessaging(app);
+
+  try {
+    let fcmToken: string | null = null;
+
+    if (Platform.OS === 'android') {
+      if (Platform.Version >= 33) {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('Android 13+ notification permission granted');
+          fcmToken = await messaging.getToken();
+        } else {
+          console.log('Android 13+ notification permission denied');
+        }
+      } else {
+        console.log('Android <13 - No need for notification permission');
+        fcmToken = await messaging.getToken();
+      }
+    } else {
+      // iOS implementation
+      const authStatus = await messaging.requestPermission();
+
+      if (
+        authStatus === AuthorizationStatus.AUTHORIZED ||
+        authStatus === AuthorizationStatus.PROVISIONAL
+      ) {
+        console.log('iOS notification permission granted');
+        fcmToken = await messaging.getToken();
+      } else {
+        console.log('iOS notification permission denied');
+      }
+    }
+
+    return fcmToken;
+  } catch (error) {
+    console.error('Error in notification setup:', error);
+    return null;
+  }
+};
+
+/**
+ * Displays a notification using Notifee for both Android and iOS.
+ * @param remoteMessage The message object received from FCM.
+ */
+export async function onDisplayNotification(remoteMessage: any): Promise<void> {
+  try {
+    // Create Android notification channel (required on Android 8+)
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      importance: AndroidImportance.HIGH,
+      visibility: AndroidVisibility.PUBLIC,
+      sound: 'default',
+    });
+
+    // Always request permission (especially required on iOS and Android 13+)
+    await notifee.requestPermission();
+
+    const {title, body, ...customData} = remoteMessage.data || {};
+
+    // Display the notification
+    await notifee.displayNotification({
+      title: title || 'Notification',
+      body: body || 'You have a new message.',
+      android: {
+        channelId,
+        importance: AndroidImportance.HIGH,
+        sound: 'default',
+        pressAction: {
+          id: 'default', // Required to capture press events
+        },
+      },
+      ios: {
+        sound: 'default',
+      },
+      data: customData, // Attach the rest of the payload
+    });
+  } catch (error) {
+    console.error('Error displaying notification:', error);
+  }
+}
+`;
+
+// ====== API CALL PATTERNS FOR SCREENS ======
+
+const apiCallPatternForScreens = `
+// Screen-level API call pattern
+const ComponentWithAPICall = () => {
+  // State for data and loading
+  const [data, setData] = useState<DataType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [screenLoader, setScreenLoader] = useState<boolean>(false);
+  const [snackBarVisible, setSnackBarVisible] = useState<boolean>(false);
+  const [snackBarMessage, setSnackBarMessage] = useState<string>('');
+  const [successColor, setSuccessColor] = useState<string>(Color.green);
+  
+  // Reference for pagination
+  const offset = useRef<number>(0);
+  
+  // Fetch data on component mount
+  useEffect(() => {
+    setScreenLoader(true);
+    fetchData();
+  }, []);
+  
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await api.getData({
+        offset: offset.current,
+      });
+      
+      if (offset.current === 0) {
+        setData(response.data);
+      } else {
+        setData(prevData => [...prevData, ...response.data]);
+      }
+      
+      // Update offset for pagination
+      if (response.data.length > 0) {
+        offset.current += response.data.length;
+      } else {
+        offset.current = -1; // No more data
+      }
+      
+    } catch (error) {
+      handleError(error, 'Fetch Data');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+      setScreenLoader(false);
+    }
+  };
+  
+  // Handle pull-to-refresh
+  const handleRefresh = () => {
+    offset.current = 0;
+    setRefreshing(true);
+    fetchData();
+  };
+  
+  // Handle load more (pagination)
+  const handleLoadMore = () => {
+    if (offset.current !== -1 && !loading) {
+      setLoading(true);
+      fetchData();
+    }
+  };
+  
+  // Handle error function
+  const handleError = (error: unknown, context: string) => {
+    if (error instanceof AxiosError) {
+      setSnackBarMessage(error.response?.data?.message || error.message);
+    } else if (error instanceof Error) {
+      if (error.message === 'No internet connection') {
+        setSnackBarMessage(error.message);
+      }
+      console.error(\`\${context} Failed:\`, error.message);
+    } else {
+      console.error(\`\${context} Failed: Unknown error\`, error);
+    }
+    setSuccessColor(Color.red);
+    setSnackBarVisible(true);
+  };
+  
+  return (
+    <View style={styles.container}>
+      {screenLoader ? (
+        <ActivityIndicator size="large" color={Color.primary} />
+      ) : (
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={loading ? <ActivityIndicator /> : null}
+          ListEmptyComponent={<EmptyState message="No data found" />}
+        />
+      )}
+      <SnackBar
+        visible={snackBarVisible}
+        onDismiss={() => setSnackBarVisible(false)}
+        message={snackBarMessage}
+        successColor={successColor}
+      />
+    </View>
+  );
+};
+`;
+
+// ====== FORM SUBMISSION PATTERN ======
+
+const formSubmissionPattern = `
+// Form submission with API integration
+const FormWithSubmission = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  
+  const validateForm = () => {
+    let newErrors = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\\S+@\\S+\\.\\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+    
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^\\d{10}$/.test(formData.phone)) {
+      newErrors.phone = 'Phone number must be 10 digits';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const response = await api.submitForm(formData);
+      
+      // Handle success
+      setSnackBarMessage('Form submitted successfully');
+      setSuccessColor(Color.green);
+      setSnackBarVisible(true);
+      
+      // Reset form or navigate
+      resetForm();
+      // or
+      navigation.goBack();
+      
+    } catch (error) {
+      handleError(error, 'Form Submission');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return (
+    <View style={styles.container}>
+      <CustomTextInput
+        placeholder="Name"
+        value={formData.name}
+        onChangeText={(text) => setFormData({...formData, name: text})}
+        error={errors.name}
+      />
+      
+      <CustomTextInput
+        placeholder="Email"
+        value={formData.email}
+        onChangeText={(text) => setFormData({...formData, email: text})}
+        error={errors.email}
+        keyboardType="email-address"
+      />
+      
+      <CustomTextInput
+        placeholder="Phone"
+        value={formData.phone}
+        onChangeText={(text) => setFormData({...formData, phone: text})}
+        error={errors.phone}
+        keyboardType="phone-pad"
+      />
+      
+      <CustomButton
+        title="Submit"
+        onPress={handleSubmit}
+        loading={loading}
+      />
+      
+      <SnackBar
+        visible={snackBarVisible}
+        onDismiss={() => setSnackBarVisible(false)}
+        message={snackBarMessage}
+        successColor={successColor}
+      />
+    </View>
+  );
+};
+`;
+
+// ====== API CACHING PATTERN ======
+
+const apiCachingPattern = `
+// src/utils/apiCache.ts
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+interface CacheItem<T> {
+  data: T;
+  timestamp: number;
+  expiry: number; // Expiry time in milliseconds
+}
+
+export const setCache = async <T>(key: string, data: T, expiry = 300000): Promise<void> => {
+  const item: CacheItem<T> = {
+    data,
+    timestamp: Date.now(),
+    expiry,
+  };
+  
+  try {
+    await AsyncStorage.setItem(key, JSON.stringify(item));
+  } catch (error) {
+    console.error('Error setting cache:', error);
+  }
+};
+
+export const getCache = async <T>(key: string): Promise<T | null> => {
+  try {
+    const value = await AsyncStorage.getItem(key);
+    
+    if (!value) {
+      return null;
+    }
+    
+    const item: CacheItem<T> = JSON.parse(value);
+    const now = Date.now();
+    
+    if (now - item.timestamp > item.expiry) {
+      // Cache expired
+      await AsyncStorage.removeItem(key);
+      return null;
+    }
+    
+    return item.data;
+  } catch (error) {
+    console.error('Error getting cache:', error);
+    return null;
+  }
+};
+
+export const clearCache = async (key: string): Promise<void> => {
+  try {
+    await AsyncStorage.removeItem(key);
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+  }
+};
+
+export const clearAllCache = async (): Promise<void> => {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const cacheKeys = keys.filter(key => key.startsWith('cache_'));
+    await AsyncStorage.multiRemove(cacheKeys);
+  } catch (error) {
+    console.error('Error clearing all cache:', error);
+  }
+};
+
+// Usage in a service
+export const getDataWithCache = async (params: any) => {
+  const cacheKey = \`cache_data_\${JSON.stringify(params)}\`;
+  
+  // Try to get from cache first
+  const cachedData = await getCache<any>(cacheKey);
+  
+  if (cachedData) {
+    return cachedData;
+  }
+  
+  // If not in cache or expired, fetch from API
+  const response = await get(API_ENDPOINTS.GET_DATA, params);
+  
+  // Store in cache for future use
+  await setCache(cacheKey, response, 600000); // 10 minutes expiry
+  
+  return response;
+};
+`;
+
+// ====== BEST PRACTICES AND GUIDELINES ======
+
+const bestPractices = `
+// BEST PRACTICES FOR API AND NETWORK HANDLING
+
+1. Error Handling:
+   - Always use try/catch blocks for API calls
+   - Implement global error handling in axios interceptors
+   - Handle network errors, timeout errors, and server errors differently
+   - Show user-friendly error messages
+
+2. Authentication:
+   - Store authentication tokens securely
+   - Implement token refresh mechanism
+   - Handle 401 errors globally to redirect to login
+   - Clear tokens on logout
+
+3. Request/Response Consistency:
+   - Use TypeScript interfaces for request/response objects
+   - Validate data before sending to API
+   - Handle null/undefined values gracefully
+
+4. Performance:
+   - Implement pagination for large data sets
+   - Cache responses where appropriate
+   - Use compression for large payloads
+   - Monitor network performance
+
+5. Testing:
+   - Mock API responses for unit tests
+   - Test error scenarios
+   - Test with slow network conditions
+   - Test with different API versions
+
+6. Security:
+   - Don't log sensitive information
+   - Sanitize user inputs
+   - Use HTTPS for all requests
+   - Implement certificate pinning for critical APIs
+
+7. Offline Support:
+   - Queue operations when offline
+   - Sync when back online
+   - Provide feedback about connection status
+   - Cache critical data for offline access
+`;
+
+module.exports = {
+  axiosInstancePattern,
+  apiConstantsPattern,
+  apiConfigPattern,
+  apiEndpointsPattern,
+  apiMethodsPattern,
+  apiServicePattern,
+  requestInterfacePattern,
+  responseInterfacePattern,
+  apiErrorHandlingPattern,
+  networkMonitoringPattern,
+  firebaseMessagingPattern,
+  apiCallPatternForScreens,
+  formSubmissionPattern,
+  apiCachingPattern,
+  bestPractices,
+};

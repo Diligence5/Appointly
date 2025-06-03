@@ -1,0 +1,914 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+// React Native Navigation .cursorrules
+
+// ====== NAVIGATION STACK SETUP ======
+
+const rootNavigationPattern = `
+// src/navigation/Route.tsx
+import React from "react";
+import { NavigationContainer, createNavigationContainerRef } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+
+// Import screens
+import LoginScreen from "../screens/auth/LoginScreen";
+import RegisterScreen from "../screens/auth/RegisterScreen";
+import BottomTabNavigator from "./BottomTabNavigator";
+import SettingsScreen from "../screens/settings/SettingsScreen";
+import ProfileScreen from "../screens/profile/ProfileScreen";
+import NotificationScreen from "../screens/notifications/NotificationScreen";
+
+// Define navigation types
+export type RootStackParamList = {
+  // Auth screens
+  Login: undefined;
+  Register: undefined;
+  ForgotPassword: { email?: string };
+  
+  // Main app screens
+  BottomTabs: undefined;
+  Settings: undefined;
+  Profile: { userId: string };
+  Notifications: undefined;
+  
+  // Other screens
+  Details: { itemId: string; title: string };
+  WebView: { url: string; title: string };
+};
+
+// Create navigation ref for use outside of components
+export const navigationRef = createNavigationContainerRef<RootStackParamList>();
+
+// Navigation helper function
+export function navigate(name: keyof RootStackParamList, params?: any) {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate(name, params);
+  }
+}
+
+// Reset navigation stack
+export function resetNavigation(routeName: keyof RootStackParamList) {
+  if (navigationRef.isReady()) {
+    navigationRef.reset({
+      index: 0,
+      routes: [{ name: routeName }],
+    });
+  }
+}
+
+function AppNavigator() {
+  // Create stack navigator with types
+  const Stack = createNativeStackNavigator<RootStackParamList>();
+  
+  // Get authentication state from Redux
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  
+  // Common screen options
+  const screenOptions = {
+    headerShown: false,
+    animation: "slide_from_right" as const,
+    gestureEnabled: true,
+  };
+
+  return (
+    <NavigationContainer ref={navigationRef}>
+      <Stack.Navigator screenOptions={screenOptions}>
+        {!isAuthenticated ? (
+          // Auth screens
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          </>
+        ) : (
+          // App screens
+          <>
+            <Stack.Screen 
+              name="BottomTabs" 
+              component={BottomTabNavigator} 
+              options={{ animation: 'fade' }} 
+            />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="Notifications" component={NotificationScreen} />
+            <Stack.Screen 
+              name="Details" 
+              component={DetailsScreen}
+              options={({ route }) => ({ 
+                headerShown: true,
+                title: route.params.title,
+              })} 
+            />
+            <Stack.Screen 
+              name="WebView" 
+              component={WebViewScreen}
+              options={({ route }) => ({ 
+                headerShown: true,
+                title: route.params.title,
+              })} 
+            />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default AppNavigator;
+`;
+
+// ====== BOTTOM TAB NAVIGATION ======
+
+const bottomTabNavigationPattern = `
+// src/navigation/BottomTabNavigator.tsx
+import React from "react";
+import { Platform, StyleSheet } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+
+// Import screens
+import HomeScreen from "../screens/home/HomeScreen";
+import SearchScreen from "../screens/search/SearchScreen";
+import OrdersScreen from "../screens/orders/OrdersScreen";
+import ProfileScreen from "../screens/profile/ProfileScreen";
+
+// Import components
+import CustomTabBar from "../components/CustomTabBar";
+import { SCREEN_WIDTH, SCREEN_HEIGHT } from "../constants/dimensions";
+import { Color } from "../theme/theme";
+
+// Define tab param list
+export type BottomTabParamList = {
+  Home: undefined;
+  Search: undefined;
+  Orders: undefined;
+  Profile: undefined;
+};
+
+function BottomTabNavigator() {
+  const Tab = createBottomTabNavigator<BottomTabParamList>();
+  const insets = useSafeAreaInsets();
+  
+  // Get user data from Redux if needed for conditional rendering
+  const user = useSelector((state: RootState) => state.auth.user);
+  
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarHideOnKeyboard: true,
+        tabBarStyle: [
+          styles.tabBar,
+          { height: 60 + (Platform.OS === 'ios' ? insets.bottom : 0) }
+        ],
+      }}
+      tabBar={(props) => <CustomTabBar {...props} />}
+      initialRouteName="Home"
+    >
+      <Tab.Screen 
+        name="Home" 
+        component={HomeScreen}
+      />
+      <Tab.Screen 
+        name="Search" 
+        component={SearchScreen}
+      />
+      <Tab.Screen 
+        name="Orders" 
+        component={OrdersScreen} 
+      />
+      <Tab.Screen 
+        name="Profile" 
+        component={ProfileScreen}
+      />
+    </Tab.Navigator>
+  );
+}
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: Color.white,
+    borderTopWidth: 1,
+    borderTopColor: Color.border,
+    elevation: 8,
+    shadowColor: Color.shadow,
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+});
+
+export default BottomTabNavigator;
+`;
+
+// ====== CUSTOM TAB BAR COMPONENT ======
+
+const customTabBarPattern = `
+// src/components/CustomTabBar.tsx
+import React from "react";
+import { View, TouchableOpacity, Text, Image, StyleSheet, Platform } from "react-native";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
+
+import { FontFamily } from "../constants/FontFamily";
+import { Color, FontSizes } from "../theme/theme";
+import images from "../../assets/images";
+
+interface TabIconsMap {
+  [key: string]: {
+    active: any;
+    inactive: any;
+  };
+}
+
+const tabIcons: TabIconsMap = {
+  Home: {
+    active: images.icon_home_selected,
+    inactive: images.icon_home_unselected,
+  },
+  Search: {
+    active: images.icon_search_selected,
+    inactive: images.icon_search_unselected,
+  },
+  Orders: {
+    active: images.icon_orders_selected,
+    inactive: images.icon_orders_unselected,
+  },
+  Profile: {
+    active: images.icon_profile_selected,
+    inactive: images.icon_profile_unselected,
+  },
+};
+
+const CustomTabBar: React.FC<BottomTabBarProps> = ({ 
+  state, 
+  descriptors, 
+  navigation 
+}) => {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  
+  return (
+    <View style={[
+      styles.container,
+      { paddingBottom: Platform.OS === 'ios' ? insets.bottom : 0 }
+    ]}>
+      {state.routes.map((route, index) => {
+        const { options } = descriptors[route.key];
+        const isFocused = state.index === index;
+        
+        const onPress = () => {
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+          });
+
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+        };
+
+        // Get appropriate icon
+        const icons = tabIcons[route.name] || { 
+          active: images.icon_default_selected, 
+          inactive: images.icon_default_unselected 
+        };
+        
+        // Get label text with translation
+        const label = t(route.name.toLowerCase());
+
+        return (
+          <TouchableOpacity
+            key={index}
+            activeOpacity={0.7}
+            onPress={onPress}
+            style={styles.tabButton}
+          >
+            <Image 
+              source={isFocused ? icons.active : icons.inactive}
+              style={[
+                styles.icon,
+                { tintColor: isFocused ? Color.primary : Color.inactive }
+              ]}
+            />
+            <Text 
+              style={[
+                styles.label,
+                { color: isFocused ? Color.primary : Color.inactive }
+              ]}
+              numberOfLines={1}
+            >
+              {label}
+            </Text>
+            <View 
+              style={[
+                styles.indicator, 
+                { 
+                  backgroundColor: isFocused ? Color.primary : 'transparent'
+                }
+              ]} 
+            />
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    backgroundColor: Color.white,
+    height: 60,
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
+  },
+  label: {
+    fontSize: FontSizes.size12,
+    fontFamily: FontFamily.regular,
+    marginTop: 4,
+  },
+  indicator: {
+    height: 2,
+    width: '50%',
+    borderRadius: 1,
+    marginTop: 4,
+  },
+});
+
+export default CustomTabBar;
+`;
+
+// ====== TOP TAB NAVIGATION ======
+
+const topTabNavigationPattern = `
+// src/screens/orders/OrdersScreen.tsx
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet } from "react-native";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+
+// Import components and screens
+import CustomHeader from "../../components/CustomHeader";
+import CustomTopTabBar from "../../components/CustomTopTabBar";
+import PendingScreen from "./tabs/PendingScreen";
+import AcceptedScreen from "./tabs/AcceptedScreen";
+import CompletedScreen from "./tabs/CompletedScreen";
+import RejectedScreen from "./tabs/RejectedScreen";
+
+// Import types and constants
+import { RootState } from "../../redux/store";
+import { Color } from "../../theme/theme";
+import { ORDER_STATUS } from "../../constants/enums";
+
+// Define tab navigator param list
+export type OrdersTabParamList = {
+  Pending: { searchText?: string };
+  Accepted: { searchText?: string };
+  Completed: { searchText?: string };
+  Rejected: { searchText?: string };
+};
+
+function OrdersScreen() {
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  
+  // State for search functionality
+  const [searchText, setSearchText] = useState("");
+  
+  // Get order counts from Redux store
+  const orderCounts = useSelector((state: RootState) => state.orders.statusCounts);
+  
+  // Create top tab navigator
+  const Tab = createMaterialTopTabNavigator<OrdersTabParamList>();
+  
+  // Fetch order status counts on mount
+  useEffect(() => {
+    dispatch(fetchOrderStatusCounts());
+  }, []);
+  
+  return (
+    <View style={styles.container}>
+      <CustomHeader
+        title={t("orders")}
+        showSearch={true}
+        onSearchChange={setSearchText}
+        showNotification={true}
+        onNotificationPress={() => navigation.navigate("Notifications")}
+      />
+      
+      <Tab.Navigator
+        tabBar={props => <CustomTopTabBar {...props} />}
+        screenOptions={{
+          swipeEnabled: true,
+          lazy: true, // Only render tabs when they become focused
+          lazyPlaceholder: () => <Loading />,
+        }}
+      >
+        <Tab.Screen 
+          name="Pending" 
+          options={{ 
+            title: t("pending"),
+            tabBarBadge: orderCounts?.pending || 0
+          }}
+          children={() => <PendingScreen searchText={searchText} />}
+        />
+        <Tab.Screen 
+          name="Accepted" 
+          options={{ 
+            title: t("accepted"),
+            tabBarBadge: orderCounts?.accepted || 0
+          }}
+          children={() => <AcceptedScreen searchText={searchText} />}
+        />
+        <Tab.Screen 
+          name="Completed" 
+          options={{ 
+            title: t("completed"),
+            tabBarBadge: orderCounts?.completed || 0
+          }}
+          children={() => <CompletedScreen searchText={searchText} />}
+        />
+        <Tab.Screen 
+          name="Rejected" 
+          options={{ 
+            title: t("rejected"),
+            tabBarBadge: orderCounts?.rejected || 0
+          }}
+          children={() => <RejectedScreen searchText={searchText} />}
+        />
+      </Tab.Navigator>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Color.background,
+  },
+});
+
+export default OrdersScreen;
+`;
+
+// ====== CUSTOM TOP TAB BAR ======
+
+const customTopTabBarPattern = `
+// src/components/CustomTopTabBar.tsx
+import React, { useRef, useEffect } from "react";
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  ScrollView, 
+  StyleSheet 
+} from "react-native";
+import { MaterialTopTabBarProps } from "@react-navigation/material-top-tabs";
+import { FontFamily } from "../constants/FontFamily";
+import { Color, FontSizes } from "../theme/theme";
+
+interface CustomTopTabBarProps extends MaterialTopTabBarProps {
+  onTabChange?: (name: string) => void;
+}
+
+const CustomTopTabBar: React.FC<CustomTopTabBarProps> = ({
+  state,
+  descriptors,
+  navigation,
+  onTabChange,
+}) => {
+  const scrollViewRef = useRef<ScrollView>(null);
+  
+  // Scroll to active tab when index changes
+  useEffect(() => {
+    // Calculate scroll position based on tab index
+    const scrollToActiveTab = () => {
+      if (scrollViewRef.current) {
+        if (state.index > 1) {
+          scrollViewRef.current.scrollTo({ 
+            x: state.index * 120, // Approximate tab width
+            animated: true 
+          });
+        } else {
+          scrollViewRef.current.scrollTo({ x: 0, animated: true });
+        }
+      }
+    };
+    
+    scrollToActiveTab();
+  }, [state.index]);
+  
+  return (
+    <View style={styles.tabContainer}>
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}
+      >
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const isFocused = state.index === index;
+          
+          // Get tab label from options or route name
+          const label = options.title || route.name;
+          
+          // Get badge count if provided
+          const badge = options.tabBarBadge;
+          
+          const onPress = () => {
+            if (!isFocused) {
+              navigation.navigate(route.name);
+              if (onTabChange) {
+                onTabChange(route.name);
+              }
+            }
+          };
+          
+          return (
+            <TouchableOpacity
+              key={index}
+              onPress={onPress}
+              style={[
+                styles.tabButton, 
+                isFocused && styles.activeTab
+              ]}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.tabText, 
+                isFocused && styles.activeTabText
+              ]}>
+                {label} {badge !== undefined ? \`(\${badge})\` : ''}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  tabContainer: {
+    backgroundColor: Color.white,
+    height: 48,
+    borderBottomWidth: 1,
+    borderBottomColor: Color.border,
+  },
+  scrollContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+  },
+  tabButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 24,
+    marginHorizontal: 4,
+    borderWidth: 1,
+    borderColor: Color.border,
+  },
+  activeTab: {
+    backgroundColor: Color.white,
+    borderColor: Color.primary,
+  },
+  tabText: {
+    fontSize: FontSizes.size14,
+    fontFamily: FontFamily.regular,
+    color: Color.text,
+  },
+  activeTabText: {
+    color: Color.primary,
+    fontFamily: FontFamily.medium,
+  },
+});
+
+export default CustomTopTabBar;
+`;
+
+// ====== NAVIGATION HOOKS ======
+
+const navigationHooksPattern = `
+// src/hooks/useAppNavigation.ts
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { RootStackParamList } from '../navigation/Route';
+import { BottomTabParamList } from '../navigation/BottomTabNavigator';
+
+// Custom hook for stack navigation with type safety
+export function useAppNavigation<
+  T extends keyof RootStackParamList = keyof RootStackParamList
+>() {
+  return useNavigation<NativeStackNavigationProp<RootStackParamList, T>>();
+}
+
+// Custom hook for bottom tab navigation with type safety
+export function useTabNavigation<
+  T extends keyof BottomTabParamList = keyof BottomTabParamList
+>() {
+  return useNavigation<BottomTabNavigationProp<BottomTabParamList, T>>();
+}
+
+// Custom hook for route params with type safety
+export function useAppRoute<T extends keyof RootStackParamList>() {
+  return useRoute<RouteProp<RootStackParamList, T>>();
+}
+
+// Custom hook for tab route params with type safety
+export function useTabRoute<T extends keyof BottomTabParamList>() {
+  return useRoute<RouteProp<BottomTabParamList, T>>();
+}
+`;
+
+// ====== NESTED NAVIGATION PATTERN ======
+
+const nestedNavigationPattern = `
+// src/navigation/NestedStackNavigator.ts
+import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// Import screens
+import MainCategoryScreen from '../screens/category/MainCategoryScreen';
+import SubCategoryScreen from '../screens/category/SubCategoryScreen';
+import ProductListScreen from '../screens/product/ProductListScreen';
+import ProductDetailScreen from '../screens/product/ProductDetailScreen';
+
+// Define nested stack param list
+export type CategoryStackParamList = {
+  MainCategory: undefined;
+  SubCategory: { categoryId: string; title: string };
+  ProductList: { subCategoryId: string; title: string };
+  ProductDetail: { productId: string; title: string };
+};
+
+const Stack = createNativeStackNavigator<CategoryStackParamList>();
+
+function CategoryNavigator() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerBackTitleVisible: false,
+        animation: 'slide_from_right',
+      }}
+    >
+      <Stack.Screen 
+        name="MainCategory" 
+        component={MainCategoryScreen} 
+        options={{ title: 'Categories' }}
+      />
+      <Stack.Screen 
+        name="SubCategory" 
+        component={SubCategoryScreen}
+        options={({ route }) => ({ title: route.params.title })}
+      />
+      <Stack.Screen 
+        name="ProductList" 
+        component={ProductListScreen}
+        options={({ route }) => ({ title: route.params.title })}
+      />
+      <Stack.Screen 
+        name="ProductDetail" 
+        component={ProductDetailScreen}
+        options={({ route }) => ({ title: route.params.title })}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export default CategoryNavigator;
+`;
+
+// ====== NAVIGATION TRANSITION ANIMATIONS ======
+
+const navigationAnimationsPattern = `
+// src/navigation/NavigationAnimations.ts
+import { TransitionSpec, CardStyleInterpolators } from '@react-navigation/stack';
+
+// Standard slide from right animation
+export const SlideFromRight: TransitionSpec = {
+  animation: 'timing',
+  config: {
+    duration: 300,
+    easing: Easing.out(Easing.poly(4)),
+  },
+};
+
+// Modal slide from bottom animation
+export const SlideFromBottom: TransitionSpec = {
+  animation: 'spring',
+  config: {
+    stiffness: 1000,
+    damping: 500,
+    mass: 3,
+    overshootClamping: true,
+    restDisplacementThreshold: 0.01,
+    restSpeedThreshold: 0.01,
+  },
+};
+
+// Fade animation
+export const FadeTransition: TransitionSpec = {
+  animation: 'timing',
+  config: {
+    duration: 250,
+    easing: Easing.inOut(Easing.ease),
+  },
+};
+
+// Screen options for common transition presets
+export const ModalScreenOptions = {
+  presentation: 'modal',
+  headerShown: false,
+  cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS,
+  transitionSpec: {
+    open: SlideFromBottom,
+    close: SlideFromBottom,
+  },
+};
+
+export const FadeScreenOptions = {
+  headerShown: false,
+  cardStyleInterpolator: CardStyleInterpolators.forFadeFromBottomAndroid,
+  transitionSpec: {
+    open: FadeTransition,
+    close: FadeTransition,
+  },
+};
+`;
+
+// ====== DEEP LINKING CONFIGURATION ======
+
+const deepLinkingPattern = `
+// src/navigation/LinkingConfiguration.ts
+import { LinkingOptions } from '@react-navigation/native';
+import { RootStackParamList } from './Route';
+
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: ['myapp://', 'https://myapp.com'],
+  config: {
+    screens: {
+      BottomTabs: {
+        screens: {
+          Home: 'home',
+          Search: 'search',
+          Orders: {
+            path: 'orders',
+            screens: {
+              Pending: 'pending',
+              Accepted: 'accepted',
+              Completed: 'completed',
+              Rejected: 'rejected',
+            },
+          },
+          Profile: 'profile',
+        },
+      },
+      Settings: 'settings',
+      Profile: {
+        path: 'profile/:userId',
+        parse: {
+          userId: (userId: string) => userId,
+        },
+      },
+      Details: {
+        path: 'details/:itemId/:title',
+        parse: {
+          itemId: (itemId: string) => itemId,
+          title: (title: string) => decodeURIComponent(title),
+        },
+      },
+      WebView: {
+        path: 'webview',
+        parse: {
+          url: (url: string) => decodeURIComponent(url),
+          title: (title: string) => decodeURIComponent(title),
+        },
+      },
+      Login: 'login',
+      Register: 'register',
+      ForgotPassword: 'forgot-password',
+    },
+  },
+};
+
+export default linking;
+`;
+
+// ====== NAVIGATION CONSTANTS ======
+
+const navigationConstantsPattern = `
+// src/constants/routes.ts
+// Define all route names to avoid string literals throughout the app
+
+export const ROUTES = {
+  // Auth routes
+  AUTH: {
+    LOGIN: 'Login' as const,
+    REGISTER: 'Register' as const,
+    FORGOT_PASSWORD: 'ForgotPassword' as const,
+  },
+  
+  // Main routes
+  MAIN: {
+    BOTTOM_TABS: 'BottomTabs' as const,
+    SETTINGS: 'Settings' as const,
+    PROFILE: 'Profile' as const,
+    NOTIFICATIONS: 'Notifications' as const,
+    DETAILS: 'Details' as const,
+    WEBVIEW: 'WebView' as const,
+  },
+  
+  // Tab routes
+  TABS: {
+    HOME: 'Home' as const,
+    SEARCH: 'Search' as const,
+    ORDERS: 'Orders' as const,
+    PROFILE: 'Profile' as const,
+  },
+  
+  // Order tab routes
+  ORDERS: {
+    PENDING: 'Pending' as const,
+    ACCEPTED: 'Accepted' as const,
+    COMPLETED: 'Completed' as const,
+    REJECTED: 'Rejected' as const,
+  },
+};
+`;
+
+// ====== BEST PRACTICES ======
+
+const navigationBestPractices = [
+  "Use TypeScript for type-safe navigation to prevent navigation errors",
+  "Implement proper navigation structure with stack and tab navigators",
+  "Create custom navigation hooks for type-safety and reusability",
+  "Use navigation constants to avoid string literals throughout the app",
+  "Implement proper deep linking configuration for external access",
+  "Create custom transition animations for better user experience",
+  "Implement conditional navigation based on authentication state",
+  "Use React Navigation's built-in navigation state persistence",
+  "Create custom tab bars for better customization and UX",
+  "Handle navigation events properly for analytics and state management",
+  "Implement proper navigation header customization",
+  "Use proper navigation lifecycle methods for screen-specific actions",
+  "Create navigation utilities for common navigation patterns",
+  "Implement proper error handling for navigation events",
+  "Optimize navigation performance with proper configuration"
+];
+
+// ====== FOLDER STRUCTURE ======
+
+const navigationFolderStructure = `
+src/
+  navigation/
+    Route.tsx                  # Main navigation container and stack
+    BottomTabNavigator.tsx     # Bottom tab navigation
+    NestedStackNavigator.tsx   # Nested stack for specific features
+    LinkingConfiguration.ts    # Deep linking configuration
+    NavigationAnimations.ts    # Custom animation configurations
+  components/
+    CustomTabBar.tsx           # Custom bottom tab bar component
+    CustomTopTabBar.tsx        # Custom material top tab bar
+    CustomHeader.tsx           # Custom header component
+  hooks/
+    useAppNavigation.ts        # Custom navigation hooks
+  constants/
+    routes.ts                  # Navigation route constants
+`;
+
+// ====== ADDITIONAL INSTRUCTIONS ======
+
+const additionalInstructions = `
+1. Always use TypeScript for navigation to ensure type safety
+2. Create reusable navigation components and hooks
+3. Implement proper deep linking for a better user experience
+4. Use proper navigation lifecycle methods
+5. Optimize navigation performance with proper configuration
+6. Implement proper error handling for navigation events
+7. Use consistent animation patterns across the app
+8. Create helper utilities for common navigation patterns
+9. Follow a consistent naming convention for screens and navigators
+10. Use proper navigation state management with Redux if needed
+`;

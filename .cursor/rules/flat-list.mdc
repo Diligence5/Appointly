@@ -1,0 +1,327 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+// React Native FlatList & API Integration Best Practices .cursorrules
+
+// ====== GENERAL STRUCTURE AND PATTERNS ======
+
+const screenStructure = `
+// Standard screen structure with FlatList
+function ScreenName(props: any): React.JSX.Element {
+  // State variables for data and loading states
+  const [data, setData] = useState<DataType[]>([]);
+  const [screenLoader, setScreenLoader] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const offset = useRef<number>(0);
+  
+  // Access user data and auth token from Redux
+  const user = useSelector((state: RootState) => state.auth.user);
+  const token = useSelector((state: RootState) => state.auth.accessToken);
+  
+  // Load data on screen focus
+  useEffect(() => {
+    setScreenLoader(true);
+    fetchData();
+  }, [isFocused]);
+  
+  // API call for initial data fetch
+  const fetchData = async () => {
+    try {
+      const response = await apiCallFunction({
+        offset: offset.current
+      });
+      
+      // Handle pagination
+      if (response?.next_offset && offset.current > 0) {
+        setData(prevData => [...prevData, ...response.list]);
+      } else {
+        setData(response?.list || []);
+      }
+      
+      // Store next offset for pagination
+      offset.current = response?.next_offset ?? 0;
+    } catch (error) {
+      handleError(error, "Data fetch");
+    } finally {
+      setScreenLoader(false);
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+  
+  // Handle API errors consistently
+  const handleError = (error: unknown, context: string) => {
+    if (error instanceof AxiosError) {
+      setSnackBarMessage(error.response?.data?.message || error.message);
+    } else if (error instanceof Error) {
+      if (error.message === 'No internet connection') {
+        setSnackBarMessage(error.message);
+        setIsInternet(false);
+      }
+      console.error(\`\${context} Failed:\`, error.message);
+    } else {
+      console.error(\`\${context} Failed: Unknown error\`, error);
+    }
+    setSuccessColor(Color.red);
+    setSnackBarVisible(true);
+  };
+  
+  // Pull to refresh handler
+  const handleRefresh = () => {
+    offset.current = 0;
+    setRefreshing(true);
+    fetchData();
+  };
+  
+  // Infinite scroll handler
+  const handleLoadMore = () => {
+    if (offset.current !== -1 && !loading) {
+      setLoading(true);
+      fetchData();
+    }
+  };
+  
+  // Item renderer for FlatList
+  const renderItem: ListRenderItem<DataType> = ({ item, index }) => {
+    return (
+      <ItemComponent 
+        item={item} 
+        onAction={() => handleAction(item.id)} 
+      />
+    );
+  };
+  
+  return (
+    <View style={styles.container}>
+      <CustomHeader title="Screen Title" />
+      {screenLoader ? (
+        <ScreenLoader />
+      ) : (
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()}
+          extraData={data}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={<NoDataFound message="No data found" />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={loading && !refreshing ? <ScreenLoader /> : null}
+        />
+      )}
+      <SnackBar
+        visible={snackBarVisible}
+        onDismiss={() => setSnackBarVisible(false)}
+        message={snackBarMessage}
+        successColor={successColor}
+      />
+    </View>
+  );
+}
+`;
+
+// ====== API INTEGRATION PATTERNS ======
+
+const apiIntegrationPatterns = [
+  "Create a dedicated API service file for each resource type",
+  "Use a common API utility layer for handling requests and responses",
+  "Implement proper error handling with meaningful error messages",
+  "Use pagination with offset/next_offset pattern for large data sets",
+  "Cache responses where appropriate to reduce API calls",
+  "Include loading and refresh states for better UX",
+  "Implement retry logic for failed requests when appropriate",
+  "Handle network connectivity issues gracefully",
+  "Use TypeScript interfaces for API response typing",
+  "Create clear separation between API services and UI components"
+];
+
+// ====== FLATLIST IMPLEMENTATION BEST PRACTICES ======
+
+const flatListBestPractices = [
+  "Use `keyExtractor` with unique identifiers (or index if no better option)",
+  "Implement `ListEmptyComponent` for empty state handling",
+  "Add `refreshControl` for pull-to-refresh functionality",
+  "Use `onEndReached` and `onEndReachedThreshold` for infinite scrolling",
+  "Include `ListFooterComponent` to show loading state during pagination",
+  "Optimize performance with `extraData` to trigger re-renders correctly",
+  "Implement `ItemSeparatorComponent` when separators are needed",
+  "Use `contentContainerStyle` for styling the content container",
+  "Set `showsVerticalScrollIndicator={false}` for cleaner UI",
+  "Memoize the renderItem function with useCallback to prevent re-renders",
+  "Use PureComponent or React.memo for list items to prevent unnecessary renders",
+  "Implement virtualization with windowSize for handling large lists"
+];
+
+// ====== STATE MANAGEMENT WITH REDUX ======
+
+const reduxIntegration = [
+  "Store authentication tokens and user data in Redux",
+  "Use Redux for app-wide state that needs to persist",
+  "Implement proper Redux slices for different domains",
+  "Use async thunks for API calls when they affect global state",
+  "Combine Redux with local component state for UI-specific state",
+  "Use selectors to access Redux state efficiently",
+  "Implement proper type definitions for Redux state and actions"
+];
+
+// ====== TYPE DEFINITIONS ======
+
+const typeDefinitions = `
+// Common interfaces for API responses
+interface PaginatedResponse<T> {
+  list: T[];
+  next_offset: number | null;
+  message?: string;
+}
+
+// Request interfaces
+interface OffsetRequest {
+  offset: number;
+  keyword?: string;
+}
+
+// Common error handling
+interface ApiError {
+  message: string;
+  status: number;
+}
+`;
+
+// ====== COMPONENT STRUCTURE ======
+
+const componentStructure = `
+// Custom list item component
+const CustomListItem = ({ item, onAction }: CustomListItemProps) => {
+  return (
+    <TouchableOpacity 
+      style={styles.itemContainer}
+      onPress={() => onAction(item.id)}
+    >
+      <View style={styles.itemContent}>
+        <Text style={styles.itemTitle}>{item.title}</Text>
+        <Text style={styles.itemDescription}>{item.description}</Text>
+      </View>
+      <Image source={images.iconRightArrow} style={styles.icon} />
+    </TouchableOpacity>
+  );
+};
+
+// No data found component
+const NoDataFound = ({ message }: { message: string }) => {
+  return (
+    <View style={styles.noDataContainer}>
+      <Image source={images.noDataIcon} style={styles.noDataIcon} />
+      <Text style={styles.noDataText}>{message}</Text>
+    </View>
+  );
+};
+
+// Screen loader component
+const ScreenLoader = () => {
+  return (
+    <View style={styles.loaderContainer}>
+      <ActivityIndicator size="large" color={Colors.primary} />
+    </View>
+  );
+};
+`;
+
+// ====== STYLING PATTERNS ======
+
+const stylingPatterns = `
+// Define styles using StyleSheet for better performance
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  listContainer: {
+    flexGrow: 1,
+    padding: 16,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: Colors.white,
+    borderRadius: 8,
+    marginBottom: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  itemContent: {
+    flex: 1,
+  },
+  itemTitle: {
+    fontSize: FontSizes.medium,
+    fontFamily: FontFamily.medium,
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  itemDescription: {
+    fontSize: FontSizes.small,
+    fontFamily: FontFamily.regular,
+    color: Colors.secondaryText,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
+  },
+  noDataContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  noDataIcon: {
+    width: 80,
+    height: 80,
+    resizeMode: 'contain',
+    marginBottom: 16,
+  },
+  noDataText: {
+    fontSize: FontSizes.medium,
+    fontFamily: FontFamily.medium,
+    color: Colors.secondaryText,
+    textAlign: 'center',
+  },
+  loaderContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
+`;
+
+// ====== ADDITIONAL INSTRUCTIONS ======
+
+const additionalInstructions = `
+1. Always implement proper error handling with meaningful user feedback
+2. Add pull-to-refresh functionality for all list screens
+3. Implement infinite scrolling for large data sets
+4. Use custom loading components for better user experience
+5. Handle empty states with custom components
+6. Add proper typings for all components and functions
+7. Use consistent styling patterns across all screens
+8. Implement proper navigation with type safety
+9. Follow the folder structure conventions of the project
+10. Use the established theme constants for colors, fonts, and spacing
+`;
