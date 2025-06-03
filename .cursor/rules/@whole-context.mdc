@@ -1,0 +1,118 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Appointly Application Context
+
+## Project Overview
+
+Appointly is a comprehensive appointment scheduling application built with React Native and Expo. It allows service providers to manage their availability, services, and bookings while customers can easily browse, book, and manage appointments.
+
+## Technology Stack
+
+- **Framework**: React Native with Expo
+- **State Management**: Redux with Redux Toolkit
+- **Navigation**: React Navigation
+- **Backend Integration**: Firebase (Auth, Firestore, Storage)
+- **Styling**: Custom StyleSheet components
+- **Localization**: react-native-localize
+
+## Architecture
+
+The application follows a feature-based structure:
+
+- **src/components**: Reusable UI components
+- **src/constants**: Application-wide constants
+- **src/interface**: TypeScript interfaces and types
+- **src/localization**: Translation files
+- **src/navigation**: Navigation configuration
+- **src/redux**: Redux store, slices, and actions
+- **src/screen**: Screen components organized by feature
+- **src/themes**: Theme-related styles and colors
+- **src/types**: Global TypeScript types
+
+## Coding Guidelines
+
+### Component Structure
+
+- Use functional components with hooks
+- Implement proper TypeScript typing
+- Keep components focused on a single responsibility
+- Extract reusable logic to custom hooks
+- Maintain consistent naming conventions
+  - Components: PascalCase (e.g., CustomButton)
+  - Files: PascalCase for components (e.g., CustomButton.tsx)
+  - Folders: lowercase with hyphens (e.g., onboarding)
+
+### Styling Approach
+
+- Use StyleSheet API for styles
+- Define styles at the bottom of component files
+- Use the theme colors from src/themes/theme.ts
+- Apply consistent spacing and typography based on the theme
+
+### State Management
+
+- Use Redux for global application state
+- Implement Redux slices for different features
+- Use local state (useState) for component-specific state
+- Prefer async/await for asynchronous operations
+
+### Firebase Integration
+
+- Use react-native-firebase packages for Firebase integration
+- Structure Firestore collections with clear naming conventions
+- Implement proper security rules for Firestore and Storage
+- Keep Firebase service logic in separate utility files
+- Handle authentication state globally through Redux
+- Use Firebase Storage for user profile images and business assets
+- Implement proper error handling for Firebase operations
+- Cache frequently accessed data to minimize Firestore reads
+
+### Testing and Quality Assurance
+
+- Write unit tests for utility functions and hooks
+- Implement component tests for critical UI elements
+- Use Jest and React Native Testing Library
+- Maintain consistent test coverage for important features
+- Mock external dependencies in tests
+- Test both success and error paths
+
+### Debugging Approaches
+
+- Use React Native Debugger for Redux and UI debugging
+- Implement proper logging with different log levels
+- Use Flipper for network inspection and performance monitoring
+- Set up exception tracking with services like Sentry
+- Add meaningful error messages to help with troubleshooting
+
+### Performance Considerations
+
+- Memoize callbacks with useCallback
+- Memoize expensive computations with useMemo
+- Implement proper list rendering optimizations with FlatList
+- Avoid unnecessary re-renders by using React.memo when appropriate
+- Lazy load components and screens when possible
+- Optimize images and assets before bundling
+
+## User Flow
+
+The application has the following main user flows:
+
+1. **Onboarding**: User registration, login, password recovery
+2. **Service Provider Setup**: Business details, services offered, pricing, availability
+3. **Customer Booking**: Browse services, select time slots, make payments
+4. **Management**: Appointment viewing, rescheduling, cancellation
+5. **Profile**: User profile management
+
+## Best Practices
+
+- Use Expo SDK features and APIs
+- Implement proper navigation with React Navigation
+- Use Expo's asset system for images and fonts
+- Implement error handling and crash reporting
+- Use proper form handling and validation
+- Follow accessibility best practices
+- Write clean, maintainable code with proper comments
+- Ensure responsive design for different screen sizes
