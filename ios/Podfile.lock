@@ -1729,7 +1729,31 @@ PODS:
     - React-logger (= 0.79.2)
     - React-perflogger (= 0.79.2)
     - React-utils (= 0.79.2)
-  - RNCAsyncStorage (2.1.2):
+  - RNCAsyncStorage (2.2.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - RNGestureHandler (2.25.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1905,6 +1929,7 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
+  - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -2057,6 +2082,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
+  RNGestureHandler:
+    :path: "../node_modules/react-native-gesture-handler"
   RNLocalize:
     :path: "../node_modules/react-native-localize"
   RNScreens:
@@ -2135,7 +2162,8 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: 04d5eb15eb46be6720e17a4a7fa92940a776e584
   ReactCodegen: c63eda03ba1d94353fb97b031fc84f75a0d125ba
   ReactCommon: 76d2dc87136d0a667678668b86f0fca0c16fdeb0
-  RNCAsyncStorage: 39c42c1e478e1f5166d1db52b5055e090e85ad66
+  RNCAsyncStorage: a1c8cc8a99c32de1244a9cf707bf9d83d0de0f71
+  RNGestureHandler: ebef699ea17e7c0006c1074e1e423ead60ce0121
   RNLocalize: 66046b78816e61e5b8211084b72afab4191d1db3
   RNScreens: 482e9707f9826230810c92e765751af53826d509
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
@@ -2143,4 +2171,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 9cccc44ee977e00a15910afbbcb0df6321516e48
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
