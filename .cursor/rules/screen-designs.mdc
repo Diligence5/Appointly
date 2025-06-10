@@ -1,0 +1,1097 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+// React Native Screen Design Patterns .cursorrules
+
+// ====== LIST SCREEN PATTERN (WITH FLATLIST) ======
+
+const listScreenPattern = `
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  FlatList,
+  RefreshControl,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { AxiosError } from 'axios';
+
+// Components
+import CustomHeader from '../../components/CustomHeader';
+import ScreenLoader from '../../components/ScreenLoader';
+import NoDataFound from '../../components/NoDataFound';
+import SnackBar from '../../components/SnackBar';
+import ScreenLoaderModal from '../../modals/ScreenLoaderModal';
+
+// Styles and constants
+import { Color, FontSizes } from '../../theme/theme';
+import images from '../../../assets/Images';
+
+// Types
+import { ListItemType } from '../../interface/ResponseInterface';
+import { RootState } from '../../redux/store';
+
+function ListScreen(props: any): React.JSX.Element {
+  // Hooks
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  
+  // State management
+  const [data, setData] = useState<ListItemType[]>([]);
+  const [screenLoader, setScreenLoader] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const offset = useRef<number>(0);
+  
+  // Error handling state
+  const [snackBarVisible, setSnackBarVisible] = useState<boolean>(false);
+  const [snackBarMessage, setSnackBarMessage] = useState<string>('');
+  const [successColor, setSuccessColor] = useState(Color.red);
+  
+  // Redux
+  const user = useSelector((state: RootState) => state.auth.user);
+  const token = useSelector((state: RootState) => state.auth.accessToken);
+
+  // Initial data loading
+  useEffect(() => {
+    setScreenLoader(true);
+    fetchData();
+  }, []);
+  
+  // API calls
+  const fetchData = async () => {
+    try {
+      const response = await apiService.getItems({ offset: offset.current });
+      
+      // Handle pagination
+      if (response.next_offset && offset.current > 0) {
+        setData(prevData => [...prevData, ...response.list]);
+      } else {
+        setData(response.list || []);
+      }
+      
+      // Update offset for next page
+      offset.current = response.next_offset ?? 0;
+    } catch (error) {
+      handleError(error, 'FetchData');
+    } finally {
+      setScreenLoader(false);
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+  
+  // Error handling
+  const handleError = (error: unknown, context: string) => {
+    if (error instanceof AxiosError) {
+      setSnackBarMessage(error.response?.data?.message || error.message);
+    } else if (error instanceof Error) {
+      setSnackBarMessage(error.message);
+    } else {
+      console.error(\`\${context} Failed: Unknown error\`, error);
+    }
+    setSuccessColor(Color.red);
+    setSnackBarVisible(true);
+  };
+  
+  // Pull-to-refresh handler
+  const handleRefresh = () => {
+    offset.current = 0;
+    setRefreshing(true);
+    fetchData();
+  };
+  
+  // Infinite scroll handler
+  const handleLoadMore = () => {
+    if (offset.current !== -1 && !loading) {
+      setLoading(true);
+      fetchData();
+    }
+  };
+  
+  // Item renderer
+  const renderItem = ({ item }: { item: ListItemType }) => (
+    <TouchableOpacity 
+      style={styles.itemContainer}
+      onPress={() => props.navigation.navigate('ItemDetails', { item })}
+    >
+      <Text style={styles.itemTitle}>{item.title}</Text>
+      <Text style={styles.itemDescription}>{item.description}</Text>
+    </TouchableOpacity>
+  );
+  
+  return (
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+      <CustomHeader
+        header={t('list_title')}
+        onBackPress={() => props?.navigation.goBack()}
+      />
+      
+      <View style={{ flex: 1 }}>
+        {screenLoader ? (
+          <ScreenLoader />
+        ) : (
+          <FlatList
+            data={data}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+            renderItem={renderItem}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            ListEmptyComponent={<NoDataFound message={t('no_data_found')} />}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+            }
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={loading && !refreshing ? <ScreenLoader /> : null}
+          />
+        )}
+        
+        <SnackBar
+          visible={snackBarVisible}
+          onDismiss={() => setSnackBarVisible(false)}
+          message={snackBarMessage}
+          successColor={successColor}
+        />
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Color.white,
+  },
+  itemContainer: {
+    padding: 16,
+    backgroundColor: Color.white,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: Color.light_gray,
+  },
+  itemTitle: {
+    fontFamily: FontFamily.medium,
+    fontSize: FontSizes.size16,
+    color: Color.black,
+    marginBottom: 4,
+  },
+  itemDescription: {
+    fontFamily: FontFamily.regular,
+    fontSize: FontSizes.size14,
+    color: Color.gray,
+  },
+});
+
+export default ListScreen;
+`;
+
+// ====== FORM SCREEN PATTERN ======
+
+const formScreenPattern = `
+import React, { useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Keyboard,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import { AxiosError } from 'axios';
+
+// Components
+import CustomHeader from '../../components/CustomHeader';
+import CustomTextInput from '../../components/CustomTextInput';
+import CustomButton from '../../components/CustomButton';
+import CustomDropDown from '../../components/CustomDropDown';
+import SnackBar from '../../components/SnackBar';
+
+// Utils and constants
+import { validateValue } from '../../utility/Utility';
+import { Color, FontSizes } from '../../theme/theme';
+import { FontFamily } from '../../constants/FontFamily';
+import images from '../../../assets/Images';
+
+function FormScreen(props: any): React.JSX.Element {
+  // Hooks
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    field1: '',
+    field2: '',
+    dropdown: null,
+  });
+  
+  // UI state
+  const [buttonLoader, setButtonLoader] = useState<boolean>(false);
+  const [snackBarVisible, setSnackBarVisible] = useState<boolean>(false);
+  const [snackBarMessage, setSnackBarMessage] = useState<string>('');
+  const [successColor, setSuccessColor] = useState(Color.red);
+
+  // Form submission
+  const submitForm = async () => {
+    // Validation
+    if (!validateValue(formData.field1)) {
+      setSnackBarMessage(t('please_enter_field1'));
+      setSnackBarVisible(true);
+      return;
+    }
+    
+    try {
+      Keyboard.dismiss();
+      setButtonLoader(true);
+      
+      const response = await apiService.submitForm(formData);
+      
+      setSnackBarMessage(response.message);
+      setSnackBarVisible(true);
+      setSuccessColor(Color.dark_green);
+      
+      // Navigate on success
+      setTimeout(() => {
+        props.navigation.navigate('NextScreen', { data: response.data });
+        setButtonLoader(false);
+      }, 1000);
+    } catch (error) {
+      handleError(error, 'SubmitForm');
+      setButtonLoader(false);
+    }
+  };
+  
+  // Error handling
+  const handleError = (error: unknown, context: string) => {
+    if (error instanceof AxiosError) {
+      setSnackBarMessage(error.response?.data?.message || error.message);
+    } else if (error instanceof Error) {
+      setSnackBarMessage(error.message);
+    } else {
+      console.error(\`\${context} Failed: Unknown error\`, error);
+    }
+    setSuccessColor(Color.red);
+    setSnackBarVisible(true);
+  };
+  
+  // Memoized components
+  const renderField1 = useMemo(() => (
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>{t('field1_label')}</Text>
+      <CustomTextInput
+        value={formData.field1}
+        onChangeText={(text) => setFormData(prev => ({ ...prev, field1: text }))}
+        placeholder={t('field1_placeholder')}
+      />
+    </View>
+  ), [formData.field1]);
+  
+  const renderField2 = useMemo(() => (
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>{t('field2_label')}</Text>
+      <CustomTextInput
+        value={formData.field2}
+        onChangeText={(text) => setFormData(prev => ({ ...prev, field2: text }))}
+        placeholder={t('field2_placeholder')}
+      />
+    </View>
+  ), [formData.field2]);
+  
+  const renderDropdown = useMemo(() => (
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>{t('dropdown_label')}</Text>
+      <CustomDropDown
+        data={[
+          { label: t('option1'), value: 'option1' },
+          { label: t('option2'), value: 'option2' },
+        ]}
+        value={formData.dropdown}
+        onChange={(value) => setFormData(prev => ({ ...prev, dropdown: value }))}
+        placeholder={t('dropdown_placeholder')}
+      />
+    </View>
+  ), [formData.dropdown]);
+  
+  const renderSubmitButton = useMemo(() => (
+    <CustomButton
+      loading={buttonLoader}
+      onPress={submitForm}
+      title={t('submit')}
+      buttonStyle={styles.submitButton}
+    />
+  ), [buttonLoader]);
+  
+  return (
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <CustomHeader
+        header={t('form_title')}
+        onBackPress={() => props?.navigation.goBack()}
+      />
+      
+      <ScrollView
+        keyboardShouldPersistTaps='handled'
+        contentContainerStyle={styles.scrollContent}
+      >
+        {renderField1}
+        {renderField2}
+        {renderDropdown}
+        {renderSubmitButton}
+      </ScrollView>
+      
+      <SnackBar
+        visible={snackBarVisible}
+        onDismiss={() => setSnackBarVisible(false)}
+        message={snackBarMessage}
+        successColor={successColor}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Color.white,
+  },
+  scrollContent: {
+    padding: 16,
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  label: {
+    fontFamily: FontFamily.medium,
+    fontSize: FontSizes.size14,
+    color: Color.black,
+    marginBottom: 8,
+  },
+  submitButton: {
+    marginTop: 24,
+  },
+});
+
+export default FormScreen;
+`;
+
+// ====== MODAL COMPONENT PATTERN ======
+
+const modalComponentPattern = `
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import Modal from 'react-native-modal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+
+// Components
+import CustomButton from '../components/CustomButton';
+import CustomTextInput from '../components/CustomTextInput';
+import SnackBar from '../components/SnackBar';
+
+// Styles and constants
+import { Color, FontSizes } from '../theme/theme';
+import { FontFamily } from '../constants/FontFamily';
+import images from '../../assets/Images';
+
+interface ModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onSubmit: (data: any) => void;
+  data?: any;
+}
+
+const CustomModal: React.FC<ModalProps> = ({
+  visible = false,
+  onClose,
+  onSubmit,
+  data,
+}) => {
+  // Hooks
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  
+  // State
+  const [modalData, setModalData] = useState('');
+  const [submitLoader, setSubmitLoader] = useState(false);
+  const [snackBarVisible, setSnackBarVisible] = useState(false);
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+  const [successColor, setSuccessColor] = useState(Color.red);
+  
+  // Submit handler
+  const handleSubmit = () => {
+    if (!modalData) {
+      setSnackBarMessage(t('please_enter_data'));
+      setSnackBarVisible(true);
+      return;
+    }
+    
+    setSubmitLoader(true);
+    onSubmit(modalData);
+    setSubmitLoader(false);
+  };
+  
+  return (
+    <Modal
+      isVisible={visible}
+      onBackdropPress={onClose}
+      onBackButtonPress={onClose}
+      style={[styles.modal, { marginTop: insets.top }]}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      animationInTiming={500}
+      animationOutTiming={500}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.keyboardView}
+      >
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('modal_title')}</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Image source={images.icon_close} style={styles.closeIcon} />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.content}>
+            <Text style={styles.description}>{t('modal_description')}</Text>
+            
+            <CustomTextInput
+              value={modalData}
+              onChangeText={setModalData}
+              placeholder={t('enter_data')}
+              containerStyle={styles.input}
+            />
+            
+            <CustomButton
+              title={t('submit')}
+              loading={submitLoader}
+              onPress={handleSubmit}
+              buttonStyle={styles.submitButton}
+            />
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+      
+      <SnackBar
+        visible={snackBarVisible}
+        onDismiss={() => setSnackBarVisible(false)}
+        message={snackBarMessage}
+        successColor={successColor}
+      />
+    </Modal>
+  );
+};
+
+const styles = StyleSheet.create({
+  modal: {
+    margin: 0,
+    justifyContent: 'flex-end',
+  },
+  keyboardView: {
+    width: '100%',
+  },
+  container: {
+    backgroundColor: Color.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontFamily: FontFamily.medium,
+    fontSize: FontSizes.size18,
+    color: Color.black,
+  },
+  closeIcon: {
+    width: 24,
+    height: 24,
+  },
+  content: {
+    marginBottom: 16,
+  },
+  description: {
+    fontFamily: FontFamily.regular,
+    fontSize: FontSizes.size14,
+    color: Color.gray,
+    marginBottom: 16,
+  },
+  input: {
+    marginBottom: 16,
+  },
+  submitButton: {
+    marginTop: 8,
+  },
+});
+
+export default CustomModal;
+`;
+
+// ====== TAB-BASED SCREEN PATTERN ======
+
+const tabBasedScreenPattern = `
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+
+// Components
+import CustomHeader from '../../components/CustomHeader';
+import CustomTopTabBar from '../../components/CustomTopTabBar';
+import SnackBar from '../../components/SnackBar';
+
+// Tab screens
+import Tab1Screen from './Tab1Screen';
+import Tab2Screen from './Tab2Screen';
+import Tab3Screen from './Tab3Screen';
+
+// Styles and constants
+import { Color } from '../../theme/theme';
+import { FontFamily } from '../../constants/FontFamily';
+
+function TabBasedScreen(props: any): React.JSX.Element {
+  // Hooks
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const Tab = createMaterialTopTabNavigator();
+  
+  // State
+  const [activeTab, setActiveTab] = useState('Tab1');
+  const [snackBarVisible, setSnackBarVisible] = useState(false);
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+  const [successColor, setSuccessColor] = useState(Color.red);
+  
+  return (
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+      <CustomHeader
+        header={t('tabs_title')}
+        onBackPress={() => props?.navigation.goBack()}
+      />
+      
+      <View style={{ flex: 1 }}>
+        <Tab.Navigator
+          initialRouteName="Tab1"
+          tabBar={(props) => (
+            <CustomTopTabBar 
+              {...props} 
+              activeTab={activeTab}
+              onTabPress={(tabName) => setActiveTab(tabName)}
+            />
+          )}
+        >
+          <Tab.Screen
+            name="Tab1"
+            component={Tab1Screen}
+            options={{ tabBarLabel: t('tab1') }}
+          />
+          <Tab.Screen
+            name="Tab2"
+            component={Tab2Screen}
+            options={{ tabBarLabel: t('tab2') }}
+          />
+          <Tab.Screen
+            name="Tab3"
+            component={Tab3Screen}
+            options={{ tabBarLabel: t('tab3') }}
+          />
+        </Tab.Navigator>
+      </View>
+      
+      <SnackBar
+        visible={snackBarVisible}
+        onDismiss={() => setSnackBarVisible(false)}
+        message={snackBarMessage}
+        successColor={successColor}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Color.white,
+  },
+});
+
+export default TabBasedScreen;
+`;
+
+// ====== DETAIL SCREEN PATTERN ======
+
+const detailScreenPattern = `
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { AxiosError } from 'axios';
+
+// Components
+import CustomHeader from '../../components/CustomHeader';
+import CustomButton from '../../components/CustomButton';
+import ScreenLoader from '../../components/ScreenLoader';
+import SnackBar from '../../components/SnackBar';
+import ScreenLoaderModal from '../../modals/ScreenLoaderModal';
+
+// Styles and constants
+import { Color, FontSizes } from '../../theme/theme';
+import { FontFamily } from '../../constants/FontFamily';
+import images from '../../../assets/Images';
+
+// Types
+import { DetailItemType } from '../../interface/ResponseInterface';
+import { RootState } from '../../redux/store';
+
+function DetailScreen(props: any): React.JSX.Element {
+  // Hooks
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  
+  // Get params from navigation
+  const { itemId } = props.route.params || {};
+  
+  // State
+  const [item, setItem] = useState<DetailItemType | null>(null);
+  const [screenLoader, setScreenLoader] = useState<boolean>(true);
+  const [buttonLoader, setButtonLoader] = useState<boolean>(false);
+  const [snackBarVisible, setSnackBarVisible] = useState<boolean>(false);
+  const [snackBarMessage, setSnackBarMessage] = useState<string>('');
+  const [successColor, setSuccessColor] = useState(Color.red);
+  
+  // Redux
+  const user = useSelector((state: RootState) => state.auth.user);
+  
+  // Load item details
+  useEffect(() => {
+    fetchItemDetails();
+  }, [itemId]);
+  
+  const fetchItemDetails = async () => {
+    if (!itemId) return;
+    
+    try {
+      setScreenLoader(true);
+      const response = await apiService.getItemDetails(itemId);
+      setItem(response.result);
+    } catch (error) {
+      handleError(error, 'FetchDetails');
+    } finally {
+      setScreenLoader(false);
+    }
+  };
+  
+  // Action handler
+  const handleAction = async () => {
+    if (!item) return;
+    
+    try {
+      setButtonLoader(true);
+      const response = await apiService.performAction(item.id);
+      
+      setSnackBarMessage(response.message);
+      setSnackBarVisible(true);
+      setSuccessColor(Color.dark_green);
+      
+      // Refresh data
+      fetchItemDetails();
+    } catch (error) {
+      handleError(error, 'ActionHandler');
+    } finally {
+      setButtonLoader(false);
+    }
+  };
+  
+  // Error handling
+  const handleError = (error: unknown, context: string) => {
+    if (error instanceof AxiosError) {
+      setSnackBarMessage(error.response?.data?.message || error.message);
+    } else if (error instanceof Error) {
+      setSnackBarMessage(error.message);
+    } else {
+      console.error(\`\${context} Failed: Unknown error\`, error);
+    }
+    setSuccessColor(Color.red);
+    setSnackBarVisible(true);
+  };
+  
+  // Render loading state
+  if (screenLoader) {
+    return (
+      <View style={styles.container}>
+        <CustomHeader
+          header={t('detail_title')}
+          onBackPress={() => props?.navigation.goBack()}
+        />
+        <ScreenLoader />
+      </View>
+    );
+  }
+  
+  // Render no data state
+  if (!item) {
+    return (
+      <View style={styles.container}>
+        <CustomHeader
+          header={t('detail_title')}
+          onBackPress={() => props?.navigation.goBack()}
+        />
+        <View style={styles.noDataContainer}>
+          <Text style={styles.noDataText}>{t('no_data_found')}</Text>
+        </View>
+      </View>
+    );
+  }
+  
+  return (
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+      <CustomHeader
+        header={t('detail_title')}
+        onBackPress={() => props?.navigation.goBack()}
+      />
+      
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.contentContainer}
+      >
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('basic_info')}</Text>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>{t('id')}:</Text>
+            <Text style={styles.infoValue}>{item.id}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>{t('title')}:</Text>
+            <Text style={styles.infoValue}>{item.title}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>{t('status')}:</Text>
+            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
+              <Text style={styles.statusText}>{t(item.status)}</Text>
+            </View>
+          </View>
+        </View>
+        
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('details')}</Text>
+          <Text style={styles.description}>{item.description}</Text>
+        </View>
+      </ScrollView>
+      
+      <View style={styles.footer}>
+        <CustomButton
+          title={t('action_button')}
+          loading={buttonLoader}
+          onPress={handleAction}
+          buttonStyle={styles.actionButton}
+        />
+      </View>
+      
+      <SnackBar
+        visible={snackBarVisible}
+        onDismiss={() => setSnackBarVisible(false)}
+        message={snackBarMessage}
+        successColor={successColor}
+      />
+    </View>
+  );
+}
+
+// Helper function for status colors
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'active':
+      return Color.dark_green;
+    case 'pending':
+      return Color.yellow;
+    case 'rejected':
+      return Color.red;
+    default:
+      return Color.gray;
+  }
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Color.white,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontFamily: FontFamily.medium,
+    fontSize: FontSizes.size18,
+    color: Color.black,
+    marginBottom: 12,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  infoLabel: {
+    fontFamily: FontFamily.medium,
+    fontSize: FontSizes.size14,
+    color: Color.gray,
+    width: 80,
+  },
+  infoValue: {
+    fontFamily: FontFamily.regular,
+    fontSize: FontSizes.size14,
+    color: Color.black,
+    flex: 1,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  statusText: {
+    fontFamily: FontFamily.medium,
+    fontSize: FontSizes.size12,
+    color: Color.white,
+  },
+  description: {
+    fontFamily: FontFamily.regular,
+    fontSize: FontSizes.size14,
+    color: Color.black,
+    lineHeight: 20,
+  },
+  footer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: Color.light_gray,
+  },
+  actionButton: {
+    width: '100%',
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noDataText: {
+    fontFamily: FontFamily.medium,
+    fontSize: FontSizes.size16,
+    color: Color.gray,
+  },
+});
+
+export default DetailScreen;
+`;
+
+// ====== EMPTY STATE PATTERN ======
+
+const emptyStatePattern = `
+import React from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import { useTranslation } from 'react-i18next';
+
+// Styles and constants
+import { Color, FontSizes } from '../../theme/theme';
+import { FontFamily } from '../../constants/FontFamily';
+import images from '../../../assets/Images';
+
+interface NoDataFoundProps {
+  message?: string;
+  image?: any;
+}
+
+const NoDataFound: React.FC<NoDataFoundProps> = ({
+  message,
+  image = images.icon_no_data,
+}) => {
+  const { t } = useTranslation();
+  
+  return (
+    <View style={styles.container}>
+      <Image source={image} style={styles.image} />
+      <Text style={styles.message}>{message || t('no_data_found')}</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    minHeight: 200,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    marginBottom: 16,
+  },
+  message: {
+    fontFamily: FontFamily.medium,
+    fontSize: FontSizes.size16,
+    color: Color.gray,
+    textAlign: 'center',
+  },
+});
+
+export default NoDataFound;
+`;
+
+// ====== WEBVIEW SCREEN PATTERN ======
+
+const webviewScreenPattern = `
+import React, { useState } from 'react';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import WebView from 'react-native-webview';
+
+// Components
+import CustomHeader from '../../components/CustomHeader';
+import SnackBar from '../../components/SnackBar';
+
+// Styles and constants
+import { Color } from '../../theme/theme';
+import { SCREEN_NAME } from '../../utility/Enums';
+
+function WebViewScreen(props: any): React.JSX.Element {
+  // Hooks
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  
+  // Get params
+  const { screenName, url } = props.route.params || {};
+  
+  // State
+  const [loading, setLoading] = useState(true);
+  const [snackBarVisible, setSnackBarVisible] = useState(false);
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+  const [successColor, setSuccessColor] = useState(Color.red);
+  
+  // Determine title based on screen name
+  const getTitle = () => {
+    switch (screenName) {
+      case SCREEN_NAME.TERMS_CONDITION:
+        return t('terms_and_conditions');
+      case SCREEN_NAME.PRIVACY_POLICY:
+        return t('privacy_policy');
+      default:
+        return t('web_view');
+    }
+  };
+  
+  // Determine URL based on screen name
+  const getUrl = () => {
+    if (url) return url;
+    
+    switch (screenName) {
+      case SCREEN_NAME.TERMS_CONDITION:
+        return 'https://example.com/terms';
+      case SCREEN_NAME.PRIVACY_POLICY:
+        return 'https://example.com/privacy';
+      default:
+        return 'https://example.com';
+    }
+  };
+  
+  return (
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+      <CustomHeader
+        header={getTitle()}
+        onBackPress={() => props?.navigation.goBack()}
+      />
+      
+      <View style={styles.webViewContainer}>
+        <WebView
+          source={{ uri: getUrl() }}
+          style={styles.webView}
+          onLoadStart={() => setLoading(true)}
+          onLoadEnd={() => setLoading(false)}
+          onError={(syntheticEvent) => {
+            const { nativeEvent } = syntheticEvent;
+            setSnackBarMessage(\`\${t('web_view_error')}: \${nativeEvent.description}\`);
+            setSnackBarVisible(true);
+          }}
+        />
+        {loading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Color.primary} />
+          </View>
+        )}
+      </View>
+      
+      <SnackBar
+        visible={snackBarVisible}
+        onDismiss={() => setSnackBarVisible(false)}
+        message={snackBarMessage}
+        successColor={successColor}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Color.white,
+  },
+  webViewContainer: {
+    flex: 1,
+    position: 'relative',
+  },
+  webView: {
+    flex: 1,
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  },
+});
+
+export default WebViewScreen;
+`;

@@ -1,0 +1,540 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+// React Native Redux State Management .cursorrules
+
+// ====== REDUX TOOLKIT CONFIGURATION ======
+
+const reduxStorePattern = `
+// src/redux/store.ts
+import { configureStore } from '@reduxjs/toolkit';
+import { persistReducer, persistStore } from 'redux-persist';
+import persistConfig from './persistConfig';
+
+// Import reducers
+import authReducer, { AuthState } from './slices/authSlice';
+import userReducer, { UserState } from './slices/userSlice';
+import appReducer, { AppState } from './slices/appSlice';
+
+// Persist auth reducer
+const persistedAuthReducer = persistReducer<AuthState>(persistConfig, authReducer);
+
+// Configure the Redux store
+export const store = configureStore({
+  reducer: {
+    auth: persistedAuthReducer,
+    user: userReducer,
+    app: appReducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore Redux Persist actions to prevent serialization warnings
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+      },
+    }),
+});
+
+// Create persisted store
+export const persistor = persistStore(store);
+
+// Export RootState and AppDispatch types for use in the application
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+`;
+
+// ====== REDUX PERSIST CONFIGURATION ======
+
+const reduxPersistPattern = `
+// src/redux/persistConfig.ts
+import { PersistConfig } from 'redux-persist';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthState } from './slices/authSlice';
+
+const persistConfig: PersistConfig<AuthState> = {
+  key: 'auth', // Unique key for storage
+  storage: AsyncStorage, // Storage engine
+  whitelist: ['accessToken', 'isAuthenticated', 'user'], // Only persist these items
+  // blacklist: ['temporaryData'], // Do not persist these items
+};
+
+export default persistConfig;
+`;
+
+// ====== REDUX SLICE PATTERN ======
+
+const reduxSlicePattern = `
+// src/redux/slices/authSlice.ts
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { UserInterface } from '../../interface/CommonInterface';
+
+// Define slice state interface
+export interface AuthState {
+  accessToken: string | null;
+  isAuthenticated: boolean;
+  user: UserInterface | null;
+  fcmToken: string | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+// Initial state
+const initialState: AuthState = {
+  accessToken: null,
+  fcmToken: null,
+  isAuthenticated: false,
+  user: null,
+  isLoading: false,
+  error: null,
+};
+
+// Create slice with reducers
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    // Set access token and mark as authenticated
+    setAccessToken: (state, action: PayloadAction<string>) => {
+      state.accessToken = action.payload;
+      state.isAuthenticated = true;
+      state.error = null;
+    },
+    
+    // Set FCM token
+    setFcmToken: (state, action: PayloadAction<string>) => {
+      state.fcmToken = action.payload;
+    },
+    
+    // Set user profile data
+    setUser: (state, action: PayloadAction<UserInterface>) => {
+      state.user = action.payload;
+    },
+    
+    // Set loading state
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
+    
+    // Set error message
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
+    },
+    
+    // Clear auth data (logout)
+    clearAuth: (state) => {
+      state.accessToken = null;
+      state.isAuthenticated = false;
+      state.user = null;
+      state.fcmToken = null;
+      state.error = null;
+    },
+  },
+});
+
+// Export actions
+export const {
+  setAccessToken,
+  setFcmToken,
+  setUser,
+  setLoading,
+  setError,
+  clearAuth,
+} = authSlice.actions;
+
+// Export reducer
+export default authSlice.reducer;
+`;
+
+// ====== REDUX THUNK PATTERN ======
+
+const reduxThunkPattern = `
+// src/redux/thunks/authThunks.ts
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { setAccessToken, setUser, setLoading, setError, clearAuth } from '../slices/authSlice';
+import { login, verifyOtp, me, logout } from '../../api';
+import { LoginRequest, VerifyOtpRequest } from '../../interface/RequestInterface';
+import { AppDispatch } from '../store';
+
+// Login thunk
+export const loginUser = createAsyncThunk<void, LoginRequest, { dispatch: AppDispatch }>(
+  'auth/login',
+  async (credentials, { dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await login(credentials);
+      return response;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      dispatch(setError(errorMessage));
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+);
+
+// Verify OTP thunk
+export const verifyOtpAndLogin = createAsyncThunk<void, VerifyOtpRequest, { dispatch: AppDispatch }>(
+  'auth/verifyOtp',
+  async (verifyData, { dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await verifyOtp(verifyData);
+      const { access_token } = response;
+      
+      // Get user profile with token
+      const userResponse = await me(access_token);
+      
+      // Update Redux state
+      dispatch(setUser(userResponse.result));
+      dispatch(setAccessToken(access_token));
+      return response;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'OTP verification failed';
+      dispatch(setError(errorMessage));
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+);
+
+// Logout thunk
+export const logoutUser = createAsyncThunk<void, void, { dispatch: AppDispatch }>(
+  'auth/logout',
+  async (_, { dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      await logout();
+      dispatch(clearAuth());
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still clear auth even if API fails
+      dispatch(clearAuth());
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+);
+`;
+
+// ====== REDUX HOOKS PATTERN ======
+
+const reduxHooksPattern = `
+// src/redux/hooks.ts
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import type { RootState, AppDispatch } from './store';
+
+// Use throughout the app instead of plain 'useDispatch' and 'useSelector'
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+// Custom hooks for common selectors
+export const useAuth = () => useAppSelector((state) => ({
+  isAuthenticated: state.auth.isAuthenticated,
+  isLoading: state.auth.isLoading,
+  error: state.auth.error,
+}));
+
+export const useUser = () => useAppSelector((state) => state.auth.user);
+
+export const useAccessToken = () => useAppSelector((state) => state.auth.accessToken);
+
+export const useFcmToken = () => useAppSelector((state) => state.auth.fcmToken);
+`;
+
+// ====== REDUX INTEGRATION WITH API ======
+
+const reduxApiIntegrationPattern = `
+// src/api/config/axiosInstance.ts
+import axios from 'axios';
+import { API_BASE_URL } from './apiConfig';
+import { APIConstants } from './apiConstants';
+import { store } from '../../redux/store';
+import { clearAuth } from '../../redux/slices/authSlice';
+
+// Create Axios instance
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 15000,
+  headers: {
+    Accept: APIConstants.ContentType.JSON,
+  },
+});
+
+// Request Interceptor
+axiosInstance.interceptors.request.use(
+  (config) => {
+    // Get token from Redux store
+    const token = store.getState().auth.accessToken;
+
+    // Add Authorization header if token exists
+    if (token) {
+      config.headers.Authorization = \`Bearer \${token}\`;
+    }
+
+    // Set Content-Type based on data
+    if (config.data instanceof FormData) {
+      config.headers['Content-Type'] = APIConstants.ContentType.MULTI_PART;
+    } else {
+      config.headers['Content-Type'] = APIConstants.ContentType.JSON;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+// Response Interceptor
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle authentication errors globally
+    if (error?.response?.status === APIConstants.StatusCode.UNAUTHENTICATED) {
+      // Dispatch logout action to clear auth state
+      store.dispatch(clearAuth());
+    }
+    
+    // Log error for debugging
+    console.error('API Error:', error.response || error.message);
+    
+    return Promise.reject(error);
+  },
+);
+
+export default axiosInstance;
+`;
+
+// ====== REDUX PROVIDER SETUP ======
+
+const reduxProviderSetupPattern = `
+// App.tsx
+import React from 'react';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './src/redux/store';
+import Routes from './src/navigation/Route';
+import { PaperProvider } from 'react-native-paper';
+import { I18nextProvider } from 'react-i18next';
+import i18next from './src/localization/i18n/i18n';
+import { LogBox, View } from 'react-native';
+
+// Ignore specific warnings
+LogBox.ignoreLogs(['Warning: ...']);
+LogBox.ignoreAllLogs(true); // Only in development
+
+function App(): React.JSX.Element {
+  return (
+    <Provider store={store}>
+      {/* Wait for Redux persist rehydration */}
+      <PersistGate loading={null} persistor={persistor}>
+        <PaperProvider>
+          <I18nextProvider i18n={i18next}>
+            <Routes />
+          </I18nextProvider>
+        </PaperProvider>
+      </PersistGate>
+    </Provider>
+  );
+}
+
+export default App;
+`;
+
+// ====== REDUX USAGE IN COMPONENTS ======
+
+const reduxComponentUsagePattern = `
+// src/screens/login/LoginScreen.tsx
+import React, { useState } from 'react';
+import { View, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { useAppDispatch, useAuth } from '../../redux/hooks';
+import { loginUser } from '../../redux/thunks/authThunks';
+import CustomTextInput from '../../components/CustomTextInput';
+import CustomButton from '../../components/CustomButton';
+import SnackBar from '../../components/SnackBar';
+import { Color } from '../../theme/theme';
+import { validateValue } from '../../utility/Utility';
+
+const LoginScreen: React.FC = ({ navigation }) => {
+  const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const { isLoading, error } = useAuth();
+  
+  const [mobile, setMobile] = useState('');
+  const [snackBarVisible, setSnackBarVisible] = useState(false);
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+  
+  const handleLogin = async () => {
+    if (!validateValue(mobile)) {
+      setSnackBarMessage(t('please_enter_mobile'));
+      setSnackBarVisible(true);
+      return;
+    }
+    
+    try {
+      await dispatch(loginUser({ mobile_number: mobile })).unwrap();
+      navigation.navigate('VerifyOtp', { mobile });
+    } catch (error) {
+      // Error is already handled by the thunk and stored in Redux
+      setSnackBarMessage(error instanceof Error ? error.message : 'Login failed');
+      setSnackBarVisible(true);
+    }
+  };
+  
+  return (
+    <View style={styles.container}>
+      <CustomTextInput
+        value={mobile}
+        onChangeText={setMobile}
+        placeholder={t('enter_mobile_number')}
+        keyboardType="number-pad"
+        maxLength={10}
+      />
+      
+      <CustomButton
+        title={t('get_otp')}
+        onPress={handleLogin}
+        loading={isLoading}
+        buttonStyle={{ marginTop: 20 }}
+      />
+      
+      <SnackBar
+        visible={snackBarVisible}
+        onDismiss={() => setSnackBarVisible(false)}
+        message={snackBarMessage}
+        successColor={Color.red}
+      />
+    </View>
+  );
+};
+
+export default LoginScreen;
+`;
+
+// ====== REDUX AUTHENTICATION FLOW ======
+
+const reduxAuthFlowPattern = `
+// src/navigation/Route.tsx
+import React, { useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useAppSelector } from '../redux/hooks';
+import LoginScreen from '../screens/login/LoginScreen';
+import VerifyOtpScreen from '../screens/verifyOtp/VerifyOtpScreen';
+import BottomTab from './BottomTab';
+import WebViewScreen from '../screens/webview';
+
+// Define stack navigator param list
+export type RootStackParamList = {
+  Login: undefined;
+  VerifyOtp: { mobile: string };
+  WebView: { screenName: string };
+  BottomTab: undefined;
+  // Add other routes as needed
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+function Routes(): React.JSX.Element {
+  // Get authentication state from Redux
+  const accessToken = useAppSelector((state) => state.auth.accessToken);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+
+  // Common screen options
+  const stackOptions = {
+    headerShown: false,
+    animation: 'slide_from_right' as const,
+  };
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        {!isAuthenticated ? (
+          // Authentication screens
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} options={stackOptions} />
+            <Stack.Screen name="VerifyOtp" component={VerifyOtpScreen} options={stackOptions} />
+            <Stack.Screen name="WebView" component={WebViewScreen} options={stackOptions} />
+          </>
+        ) : (
+          // App screens (protected routes)
+          <>
+            <Stack.Screen 
+              name="BottomTab" 
+              component={BottomTab} 
+              options={{ headerShown: false, animation: 'fade' }} 
+            />
+            {/* Add other protected routes here */}
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default Routes;
+`;
+
+// ====== REDUX BEST PRACTICES ======
+
+const reduxBestPractices = [
+  "Use Redux Toolkit to reduce boilerplate and enforce best practices",
+  "Implement slices for organizing reducers and actions by feature domain",
+  "Use strongly typed state and actions with TypeScript for type safety",
+  "Create custom hooks for accessing store data to prevent direct store access in components",
+  "Implement Redux Persist for persisting necessary state across app restarts",
+  "Use proper serialization handling with middleware configuration",
+  "Create async thunks for handling API calls and complex async logic",
+  "Integrate with API layer through interceptors for automatic token handling",
+  "Keep Redux store normalized to prevent data duplication",
+  "Implement proper error handling in thunks and reducers",
+  "Use selectors for derived data to prevent unnecessary recalculations",
+  "Handle loading states explicitly to provide feedback during async operations",
+  "Use separate files for thunks and selectors to improve organization",
+  "Implement proper type safety with TypeScript for state, actions, and selectors",
+  "Avoid storing redundant or derived data in the Redux store"
+];
+
+// ====== FOLDER STRUCTURE ======
+
+const folderStructure = `
+src/
+  redux/
+    slices/              # Redux slices for different features
+      authSlice.ts
+      userSlice.ts
+      appSlice.ts
+    thunks/              # Async thunks for complex operations
+      authThunks.ts
+      userThunks.ts
+    selectors/           # Selectors for derived data
+      authSelectors.ts
+      userSelectors.ts
+    hooks.ts             # Custom hooks for accessing store
+    store.ts             # Store configuration
+    persistConfig.ts     # Redux Persist configuration
+  api/
+    config/              # API configuration
+      axiosInstance.ts   # Axios setup with Redux integration
+      apiConfig.ts       # API endpoints and constants
+    services/            # API service functions
+    utils/               # API utility functions
+`;
+
+// ====== ADDITIONAL INSTRUCTIONS ======
+
+const additionalInstructions = `
+1. Always use TypeScript for type safety in Redux implementation
+2. Create custom hooks for accessing Redux state to keep components clean
+3. Implement proper error handling in async thunks
+4. Use Redux DevTools for debugging in development
+5. Keep Redux store as minimal as possible, only storing what's needed
+6. Use Redux Persist for data that needs to survive app restarts
+7. Integrate API layer with Redux through interceptors
+8. Implement proper loading states for better user experience
+9. Follow a consistent naming convention for actions and selectors
+10. Use proper TypeScript types for all Redux related code
+`;

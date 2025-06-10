@@ -1,0 +1,1139 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+// React Native Input Components & Form Handling .cursorrules
+
+// ====== TEXT INPUT COMPONENT PATTERN ======
+
+const customTextInputPattern = `
+import React, { forwardRef } from "react";
+import {
+  StyleSheet,
+  TextInput,
+  TextInputProps as RNTextInputProps,
+  View,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+  Text,
+} from "react-native";
+import { FontFamily } from "../constants/FontFamily";
+import { Color, FontSizes } from "../theme/theme";
+
+interface CustomTextInputProps extends RNTextInputProps {
+  placeholder?: string;
+  onChangeText?: (text: string) => void;
+  containerStyle?: StyleProp<ViewStyle>;
+  textInputStyle?: StyleProp<TextStyle>;
+  editable?: boolean;
+  showTitle?: boolean;
+  error?: string;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+}
+
+const CustomTextInput = forwardRef<TextInput, CustomTextInputProps>(
+  (
+    {
+      placeholder,
+      onChangeText,
+      containerStyle,
+      textInputStyle,
+      editable = true,
+      showTitle = true,
+      error,
+      leftIcon,
+      rightIcon,
+      ...rest
+    },
+    ref
+  ): React.JSX.Element => {
+    return (
+      <View style={styles.wrapper}>
+        {showTitle && <Text style={styles.title}>{placeholder}</Text>}
+        <View
+          style={StyleSheet.flatten([
+            styles.text_input_container,
+            containerStyle,
+            !editable && { opacity: 0.7 },
+            error ? styles.errorContainer : null,
+          ])}
+        >
+          {leftIcon && <View style={styles.iconContainer}>{leftIcon}</View>}
+          <TextInput
+            ref={ref}
+            placeholder={placeholder}
+            style={StyleSheet.flatten([styles.text_input_style, textInputStyle])}
+            placeholderTextColor={Color.light_gray}
+            onChangeText={(text) => onChangeText?.(text)}
+            selectionColor={Color.black}
+            returnKeyLabel="done"
+            returnKeyType="done"
+            editable={editable}
+            {...rest}
+          />
+          {rightIcon && <View style={styles.iconContainer}>{rightIcon}</View>}
+        </View>
+        {error && <Text style={styles.errorText}>{error}</Text>}
+      </View>
+    );
+  }
+);
+
+export default CustomTextInput;
+
+const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 16,
+  },
+  text_input_container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: Color.placeholder,
+    borderWidth: 1,
+    height: 42,
+    borderRadius: 10,
+    marginTop: 8,
+    overflow: 'hidden',
+    backgroundColor: Color.white,
+  },
+  text_input_style: {
+    flex: 1,
+    fontSize: FontSizes.size14,
+    fontFamily: FontFamily.medium,
+    color: Color.black,
+    paddingHorizontal: 12,
+  },
+  title: {
+    fontSize: FontSizes.size14,
+    fontFamily: FontFamily.medium,
+    color: Color.black,
+  },
+  iconContainer: {
+    paddingHorizontal: 10,
+  },
+  errorContainer: {
+    borderColor: Color.red,
+  },
+  errorText: {
+    fontSize: FontSizes.size12,
+    fontFamily: FontFamily.regular,
+    color: Color.red,
+    marginTop: 4,
+  },
+});
+`;
+
+// ====== DROPDOWN COMPONENT PATTERN ======
+
+const customDropdownPattern = `
+import React, { useState } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
+import { Color, FontSizes } from '../theme/theme';
+import { FontFamily } from '../constants/FontFamily';
+import images from '../../assets/Images';
+
+interface DropdownItem {
+  label: string;
+  value: string | number;
+  [key: string]: any;
+}
+
+interface CustomDropdownProps {
+  data: DropdownItem[];
+  value?: string | number;
+  onChange: (value: string | number) => void;
+  placeholder?: string;
+  labelField?: string;
+  valueField?: string;
+  error?: string;
+  disabled?: boolean;
+  containerStyle?: StyleProp<ViewStyle>;
+}
+
+const CustomDropdown: React.FC<CustomDropdownProps> = ({
+  data,
+  value,
+  onChange,
+  placeholder = 'Select item',
+  labelField = 'label',
+  valueField = 'value',
+  error,
+  disabled = false,
+  containerStyle,
+}) => {
+  const [isFocus, setIsFocus] = useState(false);
+
+  return (
+    <View style={[styles.container, containerStyle]}>
+      <Text style={styles.title}>{placeholder}</Text>
+      <Dropdown
+        style={[
+          styles.dropdown, 
+          isFocus && styles.focusedDropdown,
+          error && styles.errorDropdown,
+          disabled && styles.disabledDropdown,
+        ]}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        renderRightIcon={() => <Image source={images.icon_drop_down} />}
+        data={data}
+        maxHeight={200}
+        labelField={labelField}
+        valueField={valueField}
+        placeholder={!isFocus ? placeholder : '...'}
+        value={value}
+        onFocus={() => setIsFocus(true)}
+        onBlur={() => setIsFocus(false)}
+        onChange={(item) => {
+          onChange(item?.[valueField]);
+          setIsFocus(false);
+        }}
+        disable={disabled}
+        renderItem={(item) => (
+          <View key={String(item?.[valueField])}>
+            <Text style={styles.itemText}>{item?.[labelField]}</Text>
+          </View>
+        )}
+        search
+        searchPlaceholder="Search..."
+      />
+      {error && <Text style={styles.errorText}>{error}</Text>}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 16,
+  },
+  dropdown: {
+    height: 42,
+    borderColor: Color.border,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    backgroundColor: Color.white,
+  },
+  focusedDropdown: {
+    borderColor: Color.primary,
+  },
+  errorDropdown: {
+    borderColor: Color.red,
+  },
+  disabledDropdown: {
+    opacity: 0.7,
+    backgroundColor: Color.lightGray,
+  },
+  placeholderStyle: {
+    fontSize: FontSizes.size14,
+    fontFamily: FontFamily.medium,
+    color: Color.light_gray,
+  },
+  selectedTextStyle: {
+    fontSize: FontSizes.size14,
+    fontFamily: FontFamily.medium,
+    color: Color.black,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 14,
+    fontFamily: FontFamily.regular,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  itemText: {
+    padding: 12,
+    fontSize: 14,
+    fontFamily: FontFamily.regular,
+    color: Color.black,
+  },
+  title: {
+    fontSize: FontSizes.size14,
+    fontFamily: FontFamily.medium,
+    color: Color.black,
+    marginBottom: 8,
+  },
+  errorText: {
+    fontSize: FontSizes.size12,
+    fontFamily: FontFamily.regular,
+    color: Color.red,
+    marginTop: 4,
+  },
+});
+
+export default CustomDropdown;
+`;
+
+// ====== DATE/TIME PICKER COMPONENT PATTERN ======
+
+const dateTimePickerPattern = `
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Image, StyleProp, ViewStyle } from 'react-native';
+import DatePicker from 'react-native-date-picker';
+import { Color, FontSizes } from '../theme/theme';
+import { FontFamily } from '../constants/FontFamily';
+import images from '../../assets/Images';
+import { formatDate, formatTimeTo12Hour } from '../utility/Utility';
+
+interface DateTimePickerProps {
+  mode: 'date' | 'time' | 'datetime';
+  value: Date | undefined;
+  onChange: (date: Date) => void;
+  placeholder: string;
+  error?: string;
+  containerStyle?: StyleProp<ViewStyle>;
+  minimumDate?: Date;
+  maximumDate?: Date;
+  disabled?: boolean;
+}
+
+const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
+  mode,
+  value,
+  onChange,
+  placeholder,
+  error,
+  containerStyle,
+  minimumDate,
+  maximumDate,
+  disabled = false,
+}) => {
+  const [open, setOpen] = useState(false);
+
+  const getDisplayValue = () => {
+    if (!value) return '';
+    
+    switch (mode) {
+      case 'date':
+        return formatDate(value.toISOString());
+      case 'time':
+        return formatTimeTo12Hour(value.toTimeString().split(' ')[0]);
+      case 'datetime':
+        return \`\${formatDate(value.toISOString())} \${formatTimeTo12Hour(value.toTimeString().split(' ')[0])}\`;
+      default:
+        return '';
+    }
+  };
+
+  const displayValue = getDisplayValue();
+
+  return (
+    <View style={[styles.container, containerStyle]}>
+      <Text style={styles.title}>{placeholder}</Text>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={[
+          styles.pickerContainer,
+          error && styles.errorContainer,
+          disabled && styles.disabledContainer,
+        ]}
+        onPress={() => !disabled && setOpen(true)}
+      >
+        <Text
+          style={[
+            styles.displayText,
+            !displayValue && styles.placeholderText,
+          ]}
+        >
+          {displayValue || placeholder}
+        </Text>
+        <Image
+          source={mode === 'time' ? images.icon_clock : images.icon_calendar}
+          style={styles.icon}
+        />
+      </TouchableOpacity>
+      {error && <Text style={styles.errorText}>{error}</Text>}
+
+      <DatePicker
+        modal
+        open={open}
+        date={value || new Date()}
+        mode={mode}
+        minimumDate={minimumDate}
+        maximumDate={maximumDate}
+        onConfirm={(date) => {
+          setOpen(false);
+          onChange(date);
+        }}
+        onCancel={() => {
+          setOpen(false);
+        }}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 16,
+  },
+  pickerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 42,
+    borderWidth: 1,
+    borderColor: Color.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    backgroundColor: Color.white,
+  },
+  title: {
+    fontSize: FontSizes.size14,
+    fontFamily: FontFamily.medium,
+    color: Color.black,
+    marginBottom: 8,
+  },
+  displayText: {
+    fontSize: FontSizes.size14,
+    fontFamily: FontFamily.medium,
+    color: Color.black,
+  },
+  placeholderText: {
+    color: Color.light_gray,
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+  },
+  errorContainer: {
+    borderColor: Color.red,
+  },
+  disabledContainer: {
+    opacity: 0.7,
+    backgroundColor: Color.lightGray,
+  },
+  errorText: {
+    fontSize: FontSizes.size12,
+    fontFamily: FontFamily.regular,
+    color: Color.red,
+    marginTop: 4,
+  },
+});
+
+export default CustomDateTimePicker;
+`;
+
+// ====== BUTTON COMPONENT PATTERN ======
+
+const customButtonPattern = `
+import React from 'react';
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+  View,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+  Image,
+  ImageSourcePropType,
+} from 'react-native';
+import { FontFamily } from '../constants/FontFamily';
+import { Color, FontSizes } from '../theme/theme';
+
+interface CustomButtonProps {
+  title?: string;
+  onPress: () => void;
+  loading?: boolean;
+  buttonStyle?: ViewStyle;
+  textStyle?: TextStyle;
+  disabled?: boolean;
+  color?: string;
+  icon?: ImageSourcePropType;
+  variant?: 'primary' | 'secondary' | 'outline' | 'text';
+  size?: 'small' | 'medium' | 'large';
+  leftIcon?: ImageSourcePropType;
+  rightIcon?: ImageSourcePropType;
+}
+
+const CustomButton: React.FC<CustomButtonProps> = ({
+  title,
+  onPress,
+  loading = false,
+  buttonStyle,
+  textStyle,
+  disabled = false,
+  color = Color.white,
+  icon,
+  variant = 'primary',
+  size = 'medium',
+  leftIcon,
+  rightIcon,
+}) => {
+  // Determine button styles based on variant
+  const getButtonStyles = () => {
+    switch (variant) {
+      case 'secondary':
+        return styles.secondaryButton;
+      case 'outline':
+        return styles.outlineButton;
+      case 'text':
+        return styles.textButton;
+      default:
+        return styles.primaryButton;
+    }
+  };
+
+  // Determine text styles based on variant
+  const getTextStyles = () => {
+    switch (variant) {
+      case 'secondary':
+        return styles.secondaryText;
+      case 'outline':
+        return styles.outlineText;
+      case 'text':
+        return styles.textOnlyText;
+      default:
+        return styles.primaryText;
+    }
+  };
+
+  // Determine height based on size
+  const getButtonHeight = () => {
+    switch (size) {
+      case 'small':
+        return 36;
+      case 'large':
+        return 52;
+      default:
+        return 44;
+    }
+  };
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      style={[
+        styles.button,
+        getButtonStyles(),
+        { height: getButtonHeight() },
+        disabled && styles.buttonDisabled,
+        buttonStyle,
+      ]}
+      onPress={onPress}
+      disabled={disabled || loading}
+    >
+      <View style={styles.buttonContent}>
+        {loading ? (
+          <ActivityIndicator size="small" color={color} />
+        ) : (
+          <View style={styles.contentContainer}>
+            {leftIcon && <Image source={leftIcon} style={styles.iconLeft} />}
+            {icon && <Image source={icon} style={styles.icon} />}
+            {title && <Text style={[getTextStyles(), textStyle]}>{title}</Text>}
+            {rightIcon && <Image source={rightIcon} style={styles.iconRight} />}
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const styles = StyleSheet.create({
+  button: {
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryButton: {
+    backgroundColor: Color.red,
+  },
+  secondaryButton: {
+    backgroundColor: Color.light_gray,
+  },
+  outlineButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Color.red,
+  },
+  textButton: {
+    backgroundColor: 'transparent',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryText: {
+    fontFamily: FontFamily.semi_bold,
+    fontSize: FontSizes.size14,
+    color: Color.white,
+  },
+  secondaryText: {
+    fontFamily: FontFamily.semi_bold,
+    fontSize: FontSizes.size14,
+    color: Color.black,
+  },
+  outlineText: {
+    fontFamily: FontFamily.semi_bold,
+    fontSize: FontSizes.size14,
+    color: Color.red,
+  },
+  textOnlyText: {
+    fontFamily: FontFamily.semi_bold,
+    fontSize: FontSizes.size14,
+    color: Color.red,
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+  },
+  iconLeft: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    marginRight: 8,
+  },
+  iconRight: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    marginLeft: 8,
+  },
+});
+
+export default CustomButton;
+`;
+
+// ====== FORM VALIDATION UTILITY PATTERNS ======
+
+const formValidationPatterns = `
+// Basic validation utilities for form inputs
+export const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$/i;
+  return emailRegex.test(email);
+};
+
+export const validatePhone = (phone: string): boolean => {
+  // This is a simplified regex for phone validation
+  // You may need to adjust based on region/requirements
+  const phoneRegex = /^[0-9]{10}$/;
+  return phoneRegex.test(phone);
+};
+
+export const validatePassword = (password: string): boolean => {
+  // Password must be at least 8 characters with at least one number, one uppercase letter, and one special character
+  const passwordRegex = /^(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/;
+  return passwordRegex.test(password);
+};
+
+export const validateRequired = (value: string): boolean => {
+  return value !== undefined && value !== null && value.trim() !== '';
+};
+
+export const validateMinLength = (value: string, minLength: number): boolean => {
+  return value !== undefined && value !== null && value.length >= minLength;
+};
+
+export const validateMaxLength = (value: string, maxLength: number): boolean => {
+  return value !== undefined && value !== null && value.length <= maxLength;
+};
+
+// Form validation helper
+interface ValidationRule {
+  validate: (value: any) => boolean;
+  errorMessage: string;
+}
+
+interface ValidationRules {
+  [field: string]: ValidationRule[];
+}
+
+interface FormErrors {
+  [field: string]: string;
+}
+
+export const validateForm = (formData: any, validationRules: ValidationRules): FormErrors => {
+  const errors: FormErrors = {};
+
+  Object.keys(validationRules).forEach((field) => {
+    const fieldRules = validationRules[field];
+    const value = formData[field];
+
+    for (const rule of fieldRules) {
+      if (!rule.validate(value)) {
+        errors[field] = rule.errorMessage;
+        break;
+      }
+    }
+  });
+
+  return errors;
+};
+
+// Example usage:
+/*
+const validationRules = {
+  email: [
+    { validate: validateRequired, errorMessage: 'Email is required' },
+    { validate: validateEmail, errorMessage: 'Please enter a valid email' }
+  ],
+  password: [
+    { validate: validateRequired, errorMessage: 'Password is required' },
+    { 
+      validate: (value) => validateMinLength(value, 8), 
+      errorMessage: 'Password must be at least 8 characters' 
+    }
+  ]
+};
+
+const formData = {
+  email: 'test@example.com',
+  password: 'password123'
+};
+
+const errors = validateForm(formData, validationRules);
+if (Object.keys(errors).length === 0) {
+  // Form is valid, proceed with submission
+} else {
+  // Form has errors, display them
+}
+*/
+`;
+
+// ====== FORM HOOKS PATTERN ======
+
+const formHooksPattern = `
+import { useState, useCallback } from 'react';
+
+// Custom hook for form handling
+interface UseFormOptions<T> {
+  initialValues: T;
+  onSubmit: (values: T) => void | Promise<void>;
+  validate?: (values: T) => { [K in keyof T]?: string };
+  validateOnChange?: boolean;
+}
+
+interface UseFormReturn<T> {
+  values: T;
+  errors: Partial<Record<keyof T, string>>;
+  touched: Partial<Record<keyof T, boolean>>;
+  handleChange: <K extends keyof T>(field: K) => (value: T[K]) => void;
+  handleBlur: <K extends keyof T>(field: K) => () => void;
+  handleSubmit: () => void;
+  isSubmitting: boolean;
+  reset: () => void;
+}
+
+export function useForm<T extends Record<string, any>>({
+  initialValues,
+  onSubmit,
+  validate,
+  validateOnChange = false,
+}: UseFormOptions<T>): UseFormReturn<T> {
+  const [values, setValues] = useState<T>(initialValues);
+  const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
+  const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validateForm = useCallback(() => {
+    if (!validate) return {};
+    return validate(values);
+  }, [validate, values]);
+
+  const handleChange = <K extends keyof T>(field: K) => (value: T[K]) => {
+    setValues(prev => ({ ...prev, [field]: value }));
+    
+    if (validateOnChange) {
+      const validationErrors = validateForm();
+      setErrors(prev => ({ ...prev, [field]: validationErrors[field] }));
+    }
+  };
+
+  const handleBlur = <K extends keyof T>(field: K) => () => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    
+    const validationErrors = validateForm();
+    setErrors(prev => ({ ...prev, [field]: validationErrors[field] }));
+  };
+
+  const handleSubmit = async () => {
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
+    
+    const newTouched = Object.keys(values).reduce(
+      (acc, key) => ({ ...acc, [key]: true }),
+      {}
+    );
+    setTouched(newTouched as Partial<Record<keyof T, boolean>>);
+    
+    if (Object.keys(validationErrors).length === 0) {
+      setIsSubmitting(true);
+      try {
+        await onSubmit(values);
+      } catch (error) {
+        console.error('Form submission error:', error);
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  const reset = () => {
+    setValues(initialValues);
+    setErrors({});
+    setTouched({});
+    setIsSubmitting(false);
+  };
+
+  return {
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    isSubmitting,
+    reset,
+  };
+}
+
+// Example usage:
+/*
+const LoginForm = () => {
+  const { 
+    values, 
+    errors, 
+    touched, 
+    handleChange, 
+    handleBlur, 
+    handleSubmit, 
+    isSubmitting 
+  } = useForm({
+    initialValues: { 
+      email: '', 
+      password: '' 
+    },
+    validate: (values) => {
+      const errors: { [key: string]: string } = {};
+      
+      if (!values.email) {
+        errors.email = 'Email is required';
+      } else if (!validateEmail(values.email)) {
+        errors.email = 'Invalid email format';
+      }
+      
+      if (!values.password) {
+        errors.password = 'Password is required';
+      } else if (values.password.length < 8) {
+        errors.password = 'Password must be at least 8 characters';
+      }
+      
+      return errors;
+    },
+    onSubmit: async (values) => {
+      try {
+        await loginAPICall(values);
+        // Handle successful login
+      } catch (error) {
+        // Handle login error
+      }
+    },
+  });
+
+  return (
+    <View style={styles.container}>
+      <CustomTextInput
+        placeholder="Email"
+        value={values.email}
+        onChangeText={handleChange('email')}
+        onBlur={handleBlur('email')}
+        error={touched.email ? errors.email : undefined}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      
+      <CustomTextInput
+        placeholder="Password"
+        value={values.password}
+        onChangeText={handleChange('password')}
+        onBlur={handleBlur('password')}
+        error={touched.password ? errors.password : undefined}
+        secureTextEntry
+      />
+      
+      <CustomButton
+        title="Login"
+        onPress={handleSubmit}
+        loading={isSubmitting}
+        disabled={isSubmitting}
+      />
+    </View>
+  );
+};
+*/
+`;
+
+// ====== COMPLETE FORM EXAMPLE PATTERN ======
+
+const completeFormExamplePattern = `
+import React from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import CustomHeader from '../../components/CustomHeader';
+import CustomTextInput from '../../components/CustomTextInput';
+import CustomDropdown from '../../components/CustomDropdown';
+import CustomDateTimePicker from '../../components/CustomDateTimePicker';
+import CustomButton from '../../components/CustomButton';
+import { useForm } from '../../hooks/useForm';
+import { validateEmail, validatePhone, validateRequired } from '../../utility/ValidationUtils';
+import { Color } from '../../theme/theme';
+import SnackBar from '../../components/SnackBar';
+import ScreenLoaderModal from '../../modals/ScreenLoaderModal';
+
+interface FormValues {
+  name: string;
+  email: string;
+  phone: string;
+  category: string;
+  birthdate: Date | undefined;
+}
+
+const categoryOptions = [
+  { label: 'Category A', value: 'A' },
+  { label: 'Category B', value: 'B' },
+  { label: 'Category C', value: 'C' },
+];
+
+const FormScreen: React.FC = ({ navigation }) => {
+  const { t } = useTranslation();
+  const [snackBarVisible, setSnackBarVisible] = useState(false);
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+  const [successColor, setSuccessColor] = useState(Color.red);
+  const [screenLoaderVisible, setScreenLoaderVisible] = useState(false);
+
+  const { 
+    values, 
+    errors, 
+    touched, 
+    handleChange, 
+    handleBlur, 
+    handleSubmit, 
+    isSubmitting 
+  } = useForm<FormValues>({
+    initialValues: { 
+      name: '', 
+      email: '', 
+      phone: '',
+      category: '',
+      birthdate: undefined,
+    },
+    validate: (values) => {
+      const errors: Partial<Record<keyof FormValues, string>> = {};
+      
+      if (!validateRequired(values.name)) {
+        errors.name = t('name_required');
+      }
+      
+      if (!validateRequired(values.email)) {
+        errors.email = t('email_required');
+      } else if (!validateEmail(values.email)) {
+        errors.email = t('invalid_email');
+      }
+      
+      if (!validateRequired(values.phone)) {
+        errors.phone = t('phone_required');
+      } else if (!validatePhone(values.phone)) {
+        errors.phone = t('invalid_phone');
+      }
+      
+      if (!values.category) {
+        errors.category = t('category_required');
+      }
+      
+      if (!values.birthdate) {
+        errors.birthdate = t('birthdate_required');
+      }
+      
+      return errors;
+    },
+    onSubmit: async (values) => {
+      try {
+        setScreenLoaderVisible(true);
+        // API call to submit form
+        await submitFormAPICall(values);
+        
+        setSnackBarMessage(t('form_success'));
+        setSuccessColor(Color.dark_green);
+        setSnackBarVisible(true);
+        
+        // Navigate or perform additional actions on success
+        setTimeout(() => {
+          navigation.goBack();
+        }, 1000);
+      } catch (error) {
+        setSnackBarMessage(
+          error instanceof Error ? error.message : t('form_error')
+        );
+        setSuccessColor(Color.red);
+        setSnackBarVisible(true);
+      } finally {
+        setScreenLoaderVisible(false);
+      }
+    },
+  });
+
+  const submitFormAPICall = async (data: FormValues) => {
+    // Mock API call - replace with actual implementation
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // Simulate success
+        resolve({ success: true });
+        
+        // Or simulate error
+        // reject(new Error('Form submission failed'));
+      }, 1500);
+    });
+  };
+
+  return (
+    <View style={styles.container}>
+      <CustomHeader
+        header={t('profile_form')}
+        onBackPress={() => navigation.goBack()}
+      />
+      
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <CustomTextInput
+          placeholder={t('full_name')}
+          value={values.name}
+          onChangeText={handleChange('name')}
+          onBlur={handleBlur('name')}
+          error={touched.name ? errors.name : undefined}
+        />
+        
+        <CustomTextInput
+          placeholder={t('email')}
+          value={values.email}
+          onChangeText={handleChange('email')}
+          onBlur={handleBlur('email')}
+          error={touched.email ? errors.email : undefined}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        
+        <CustomTextInput
+          placeholder={t('phone')}
+          value={values.phone}
+          onChangeText={handleChange('phone')}
+          onBlur={handleBlur('phone')}
+          error={touched.phone ? errors.phone : undefined}
+          keyboardType="phone-pad"
+        />
+        
+        <CustomDropdown
+          placeholder={t('category')}
+          data={categoryOptions}
+          value={values.category}
+          onChange={handleChange('category')}
+          error={touched.category ? errors.category : undefined}
+        />
+        
+        <CustomDateTimePicker
+          mode="date"
+          placeholder={t('birthdate')}
+          value={values.birthdate}
+          onChange={handleChange('birthdate')}
+          error={touched.birthdate ? errors.birthdate : undefined}
+          maximumDate={new Date()} // Can't select future dates
+        />
+        
+        <View style={styles.buttonContainer}>
+          <CustomButton
+            title={t('submit')}
+            onPress={handleSubmit}
+            loading={isSubmitting}
+            disabled={isSubmitting}
+          />
+        </View>
+      </ScrollView>
+      
+      <SnackBar
+        visible={snackBarVisible}
+        onDismiss={() => setSnackBarVisible(false)}
+        message={snackBarMessage}
+        successColor={successColor}
+      />
+      
+      <ScreenLoaderModal visible={screenLoaderVisible} />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Color.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  buttonContainer: {
+    marginTop: 24,
+  },
+});
+
+export default FormScreen;
+`;
+
+// ====== BEST PRACTICES FOR FORM INPUTS ======
+
+const formInputBestPractices = [
+  "Use forwardRef for text inputs to allow parent components to access the input's methods",
+  "Implement consistent error handling and display across all input components",
+  "Include loading states for all action buttons to provide feedback during async operations",
+  "Design input components with accessibility in mind (proper labels, keyboard handling, etc.)",
+  "Use validation utilities to enforce consistent validation rules across the app",
+  "Implement proper keyboard handling (return key behavior, keyboard type, etc.)",
+  "Include support for icons and styling customization in input components",
+  "Handle focus and blur states appropriately for visual feedback",
+  "Implement form state management using custom hooks for reusability",
+  "Ensure all input components handle disabled states consistently",
+  "Design components to be responsive to different screen sizes",
+  "Include clear button for text inputs when appropriate",
+  "Implement proper contrast for placeholder text vs input text",
+  "Support RTL languages in input layouts",
+  "Use consistent padding and margins across all form elements"
+];
+
+// ====== ADDITIONAL INSTRUCTIONS ======
+
+const additionalInstructions = `
+1. Always include proper type definitions for all component props
+2. Implement consistent error handling across all form inputs
+3. Create reusable validation utilities for common validation patterns
+4. Use custom hooks for form state management to reduce boilerplate
+5. Design form components with accessibility in mind
+6. Follow consistent styling patterns across all input components
+7. Include proper keyboard handling for better user experience
+8. Implement loading states for all actions to provide feedback during async operations
+9. Create comprehensive form examples as templates for new forms
+10. Add documentation for all form components and utilities
+`;

@@ -18,6 +18,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import images from '../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 interface ChatMessage {
   id: string;
@@ -27,6 +28,7 @@ interface ChatMessage {
 }
 
 export const MessageDetailScreen = ({ route, navigation }: any) => {
+  const { t } = useTranslation();
   const { messageId } = route.params;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -59,30 +61,30 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
     const mockConversation: ChatMessage[] = [
       {
         id: '1',
-        text: `Hello ${user?.name || 'there'}, how are you feeling today?`,
+        text: `${t('hello_there').replace('there', user?.name || 'there')}`,
         isUser: false,
         timestamp: '10:30 AM'
       },
       {
         id: '2',
-        text: 'I\'m doing well, thank you for asking.',
+        text: t('doing_well'),
         isUser: true,
         timestamp: '10:32 AM'
       },
       {
         id: '3',
         text: messageId === '1'
-          ? 'Great! I wanted to confirm your appointment for tomorrow at 2:00 PM. Does that still work for you?'
+          ? t('appointment_confirmation')
           : messageId === '2'
-            ? 'Welcome to Appointly! If you need any help getting started, please don\'t hesitate to reach out.'
-            : 'Your test results have been uploaded to your patient portal. Everything looks good!',
+            ? t('welcome_message')
+            : t('test_results'),
         isUser: false,
         timestamp: '10:33 AM'
       },
     ];
 
     setMessages(mockConversation);
-  }, [messageId, user]);
+  }, [messageId, user, t]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -125,7 +127,7 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
       setTimeout(() => {
         const responseMsg: ChatMessage = {
           id: Date.now().toString(),
-          text: "Thanks for your message. I'll get back to you soon!",
+          text: t('default_response'),
           isUser: false,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
@@ -150,7 +152,7 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
         </TouchableOpacity>
 
         <View style={styles.contactInfo}>
-          <Text style={styles.contactName}>{contact?.name || 'Contact'}</Text>
+          <Text style={styles.contactName}>{contact?.name || t('contact')}</Text>
           <Text style={styles.contactProfession}>{contact?.profession || ''}</Text>
         </View>
 
@@ -159,7 +161,7 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
         ) : (
           <View style={styles.contactAvatarPlaceholder}>
             <Text style={styles.contactAvatarText}>
-              {(contact?.name || 'C').charAt(0)}
+              {(contact?.name || t('contact').charAt(0)).charAt(0)}
             </Text>
           </View>
         )}
@@ -204,7 +206,7 @@ export const MessageDetailScreen = ({ route, navigation }: any) => {
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              placeholder="Type a message..."
+              placeholder={t('type_a_message')}
               value={newMessage}
               onChangeText={setNewMessage}
               multiline

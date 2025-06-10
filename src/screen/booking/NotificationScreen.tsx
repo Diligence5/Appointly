@@ -13,6 +13,7 @@ import { Color } from '../../themes/theme';
 import { FontFamily } from '../../constants/FontFamily';
 import images from '../../../assets/images/images';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 // Define notification interface
 interface Notification {
@@ -26,6 +27,7 @@ interface Notification {
 }
 
 export const NotificationScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const insets = useSafeAreaInsets();
 
     // Mock data for notifications
@@ -33,18 +35,18 @@ export const NotificationScreen = ({ navigation }: any) => {
         {
             id: '1',
             type: 'appointment',
-            title: 'Upcoming Appointment',
-            details: 'You have an appointment with John Doe for Haircut on 15 Dec at 2:30PM',
-            time: 'Just Now',
+            title: t('upcoming_appointment'),
+            details: `You have an appointment with John Doe for Haircut on 15 Dec at 2:30PM`,
+            time: t('just_now'),
             isNew: true,
             date: '15 Dec'
         },
         {
             id: '2',
             type: 'booking',
-            title: 'New Booking Received',
-            details: 'John Doe has booked Haircut on 15 Dec at 2:30PM',
-            time: 'Just Now',
+            title: t('new_booking_received'),
+            details: `John Doe has booked Haircut on 15 Dec at 2:30PM`,
+            time: t('just_now'),
             isNew: true,
             date: '15 Dec'
         },
@@ -54,18 +56,18 @@ export const NotificationScreen = ({ navigation }: any) => {
         {
             id: '3',
             type: 'booking',
-            title: 'New Booking Received',
-            details: 'John Doe has booked Haircut on 15 Dec at 2:30PM',
-            time: 'Just Now',
+            title: t('new_booking_received'),
+            details: `John Doe has booked Haircut on 15 Dec at 2:30PM`,
+            time: t('just_now'),
             isNew: true,
             date: '15 Dec'
         },
         {
             id: '4',
             type: 'booking',
-            title: 'New Booking Received',
-            details: 'John Doe has booked Haircut on 15 Dec at 2:30PM',
-            time: 'Just Now',
+            title: t('new_booking_received'),
+            details: `John Doe has booked Haircut on 15 Dec at 2:30PM`,
+            time: t('just_now'),
             isNew: true,
             date: '15 Dec'
         },
@@ -118,7 +120,7 @@ export const NotificationScreen = ({ navigation }: any) => {
                     />
                 </TouchableOpacity>
 
-                <Text style={styles.headerTitle}>Notification</Text>
+                <Text style={styles.headerTitle}>{t('notification')}</Text>
 
                 <TouchableOpacity style={styles.settingsButton} onPress={navigateToSettings}>
                     <Image
@@ -132,7 +134,7 @@ export const NotificationScreen = ({ navigation }: any) => {
             <ScrollView style={styles.scrollContainer}>
                 {/* Newest Section */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Newest</Text>
+                    <Text style={styles.sectionTitle}>{t('newest')}</Text>
 
                     {newestNotifications.map(item => (
                         <View key={item.id}>
@@ -143,7 +145,7 @@ export const NotificationScreen = ({ navigation }: any) => {
 
                 {/* Oldest Section */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Oldest</Text>
+                    <Text style={styles.sectionTitle}>{t('oldest')}</Text>
 
                     {oldestNotifications.map(item => (
                         <View key={item.id}>
